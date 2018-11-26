@@ -1,0 +1,6 @@
+language: scala
+sudo: false
+script: "sbt clean coverage test"
+after_success: "sbt coverageReport coveralls"
+scala:
+   - 2.12.4
