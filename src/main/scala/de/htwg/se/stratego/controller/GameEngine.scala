@@ -25,7 +25,7 @@ class GameEngine(gb: GameBoard) {
 
     //Field is empty
     if (gb.get(to).strength == -1) {
-      gb.setFieldAt(to, gb.get(from))
+      gb.setFieldAt(to, gb.get(from).strength)
       //TODO
     }
     true

@@ -1,6 +1,6 @@
 package de.htwg.se.stratego.view
 
-import de.htwg.se.stratego.model.GameBoard
+import de.htwg.se.stratego.model.{Coordinates, Figure, GameBoard}
 
 import scala.io.StdIn
 
@@ -58,7 +58,7 @@ object StrategoTUI {
         case Array("set", a, b) =>
           val x = a.toInt
           val y = b.toInt
-          board.setFieldAt((x, y), "Figs")
+          board.setFieldAt(new Coordinates(x, y), Figure.BOMB)
 
         case Array("exit", _*) =>
           sys.exit(0)

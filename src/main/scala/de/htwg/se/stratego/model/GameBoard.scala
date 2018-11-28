@@ -2,8 +2,8 @@ package de.htwg.se.stratego.model
 
 class GameBoard(fields:Array[Array[Figure]]) {
 
-  def setFieldAt(coords: Coordinates, fig:Figure): Unit = {
-    fields(coords.x)(coords.y) = fig
+  def setFieldAt(coords: Coordinates, strength:Int): Unit = {
+    fields(coords.x)(coords.y) = Figure.withStrength(null, strength)
   }
 
   def this() {
