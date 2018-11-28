@@ -42,6 +42,9 @@ object StrategoTUI {
       val params = line.split(" ")
 
       params match {
+        case Array("clean", _*) =>
+          println("Creating new Gameboard")
+
         case Array("test", a, b) =>
           println(a + " " + b)
 
