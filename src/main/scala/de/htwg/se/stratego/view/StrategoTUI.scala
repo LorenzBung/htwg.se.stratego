@@ -38,6 +38,7 @@ object StrategoTUI {
 
   def mainLoop(): Unit ={
     var line : String = ""
+    print(Console.RED + "> " + Console.RESET)
     while (!{line = StdIn.readLine(); line}.isEmpty) {
       val params = line.split(" ")
 
@@ -63,9 +64,9 @@ object StrategoTUI {
 
         case _ =>
           println("Available Commands:")
-          println("show, move <X1> <Y1> <X2> <Y2>, exit")
+          println("show, move <X1> <Y1> <X2> <Y2>, exit, clean")
       }
-      print(Console.RED + Console.RESET + "> ")
+      print(Console.RED + "> " + Console.RESET)
     }
   }
 
