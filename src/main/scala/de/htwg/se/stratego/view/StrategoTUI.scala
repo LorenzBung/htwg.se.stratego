@@ -1,8 +1,11 @@
 package de.htwg.se.stratego.view
 
+import de.htwg.se.stratego.model.GameBoard
+
 import scala.io.StdIn
 
 object StrategoTUI {
+  var board = new GameBoard()
 
   def main(args: Array[String]): Unit = {
     start()
@@ -32,41 +35,39 @@ object StrategoTUI {
     println("11: Bomb")
     println()
 
-    mainLoop()
+    mainLoop(board)
   }
 
+  def mainLoop(board: GameBoard) {
+    print(Console.RED + Console.BOLD + "stratego> " + Console.RESET)
 
-  def mainLoop(): Unit ={
     var line : String = ""
-    print(Console.RED + "> " + Console.RESET)
     while (!{line = StdIn.readLine(); line}.isEmpty) {
       val params = line.split(" ")
 
       params match {
         case Array("clean", _*) =>
-          println("Creating new Gameboard")
+          println("Creating new GameBoard")
 
         case Array("test", a, b) =>
           println(a + " " + b)
 
-        case Array("show", _*) =>
-          println("null")
+        case Array("show") =>
+          println(board)
 
-          case Array("move", a, b, c, d) =>
-            val x1 = a.toInt
-            val y1 = b.toInt
-            val x2 = c.toInt
-            val y2 = d.toInt
-            //TODO
+        case Array("set", a, b) =>
+          val x = a.toInt
+          val y = b.toInt
+          board.setFieldAt((x, y), "Figs")
 
         case Array("exit", _*) =>
           sys.exit(0)
 
         case _ =>
-          println("Available Commands:")
-          println("show, move <X1> <Y1> <X2> <Y2>, exit, clean")
+          println("Unrecognized Command")
       }
-      print(Console.RED + "> " + Console.RESET)
+
+      print(Console.RED + Console.BOLD + "stratego> " + Console.RESET)
     }
   }
 
