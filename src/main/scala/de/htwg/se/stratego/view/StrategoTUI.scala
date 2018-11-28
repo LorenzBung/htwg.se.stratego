@@ -58,7 +58,7 @@ object StrategoTUI {
         case Array("set", a, b) =>
           val x = a.toInt
           val y = b.toInt
-          board.setFieldAt(new Coordinates(x, y), Figure.BOMB)
+          // TODO
 
         case Array("exit", _*) =>
           sys.exit(0)

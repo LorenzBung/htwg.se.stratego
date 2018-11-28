@@ -1,18 +1,18 @@
 package de.htwg.se.stratego.controller
 
-import de.htwg.se.stratego.model.{GameBoard, Coordinates, Figure}
+import de.htwg.se.stratego.model.{Coordinates, Field, Figure, GameBoard}
 
 class GameEngine(gb: GameBoard) {
   def moveFigure(from: Coordinates, to: Coordinates): Boolean = {
-    val fig: Figure = gb.get(from)
+    val field:Field = gb.get(from)
 
     //No Figure on Field "from"
-    if (fig.strength == -1) {
+    if (field.isEmpty) {
       return false
     }
 
     //Figure on the field is not movable
-    if (fig.isMovable) {
+    if (field.figure.isMovable) {
       return false
     }
 
@@ -24,8 +24,7 @@ class GameEngine(gb: GameBoard) {
     }
 
     //Field is empty
-    if (gb.get(to).strength == -1) {
-      gb.setFieldAt(to, gb.get(from).strength)
+    if (gb.get(to).isEmpty) {
       //TODO
     }
     true
