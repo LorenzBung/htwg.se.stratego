@@ -1,13 +1,17 @@
 package de.htwg.se.stratego.model
 
-class GameBoard(fields:Array[Array[String]]) {
+class GameBoard(fields:Array[Array[Figure]]) {
 
-  def setFieldAt(f:(Int,Int), value:String): Unit = {
-    fields(f._1)(f._2) = value
+  def setFieldAt(coords: Coordinates, fig:Figure): Unit = {
+    fields(coords.x)(coords.y) = fig
   }
 
-  def this(){
-    this(Array.ofDim[String](GameBoard.BoardSize, GameBoard.BoardSize))
+  def this() {
+    this(Array.ofDim[Figure](GameBoard.BoardSize, GameBoard.BoardSize))
+  }
+
+  def get(coords: Coordinates): Figure = {
+    fields(coords.x)(coords.y)
   }
 
   override def toString: String = {
