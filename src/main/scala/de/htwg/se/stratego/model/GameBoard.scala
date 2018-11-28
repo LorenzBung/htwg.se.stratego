@@ -11,13 +11,7 @@ class GameBoard(fields:Array[Array[String]]) {
   }
 
   override def toString: String = {
-    var str = ""
-    for (row <- fields){
-      for (field <- row)
-        str += field + " | "
-      str += "\n"
-    }
-    str
+    fields.map(_.mkString(" | ")).mkString("\n")
   }
 }
 
