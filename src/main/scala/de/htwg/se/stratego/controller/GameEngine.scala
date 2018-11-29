@@ -1,32 +1,171 @@
 package de.htwg.se.stratego.controller
+import de.htwg.se.stratego.model._
+import de.htwg.se.stratego.view.StrategoTUI
+import scalafx.scene.control.Alert
+import scalafx.scene.control.Alert.AlertType
 
-import de.htwg.se.stratego.model.{Coordinates, Field, Figure, GameBoard}
+case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
+  var currentPlayer:Player = playerOne
 
-class GameEngine(gb: GameBoard) {
-  def moveFigure(from: Coordinates, to: Coordinates): Boolean = {
-    val field:Field = gb.get(from)
+  def exit(): Unit = {
+    System.exit(0)
+  }
 
-    //No Figure on Field "from"
-    if (field.isEmpty) {
+  /**
+    * Moves a Figure from a position to another.
+    * @param from The current coords of the figure to be moved.
+    * @param to The coords the figure is moved to.
+    * @return False, if the figure can't be moved, otherwise true.
+    */
+  def move(from: Coordinates, to: Coordinates): Boolean = {
+    // No figure on field "from" OR field locked
+    if (gb.get(from).isEmpty || gb.get(to).isLocked) return false
+
+    val attacker: Figure = gb.get(from).figure
+
+    if (!canMove(from, to) || !attacker.isMovable || attacker.player != currentPlayer) return false
+
+    if (gb.get(to).isEmpty) {
+      gb.move(from, to)
+      switchPlayers()
+      return true
+    }
+
+    val defender: Figure = gb.get(to).figure
+
+    // Attacker must be the current player, cannot beat own figures
+    if (defender.player == currentPlayer) return false
+
+    //Field is empty OR has figure of other player on it
+    if (attacker.strength == Figure.MINER && defender.strength == Figure.BOMB) {
+      // Miner defuses Bomb
+      gb.move(from, to)
+    } else if (attacker.strength == Figure.SPY && defender.strength == Figure.MARSHAL) {
+      // Spy kills Marshal
+      gb.move(from, to)
+    } else if (defender.strength == Figure.FLAG) {
+      // Attacker wins game
+      gb.move(from, to)
+      println()
+      println(attacker.player.name + " wins")
+      new Alert(AlertType.Information, attacker.player.name + " wins").showAndWait()
+      exit()
+    } else if (attacker.strength > defender.strength) {
+      // Attacker wins
+      gb.move(from, to)
+    } else if (defender.strength > attacker.strength){
+      // Defender wins
+      gb.set(from, None)
+    } else if (defender.strength == attacker.strength) {
+      // Figures have same strength
+      gb.set(from, None)
+      gb.set(to, None)
+    }
+
+    switchPlayers()
+
+    true
+  }
+
+  def canMove(from: Coordinates, to: Coordinates): Boolean = {
+    // Can't move diagonally
+    if (from.x != to.x && from.y != to.y) return false
+
+    if (gb.get(from).figure.strength == Figure.SCOUT) {
+      if (from.x < to.x) {
+        for (between <- from.x + 1 until  to.x ){
+          val f = gb.get(Coordinates(between, to.y))
+          if (!f.isEmpty || f.isLocked) return false
+        }
+      } else if (from.x > to.x) {
+        for (between <- to.x + 1 until from.x){
+          val f = gb.get(Coordinates(between, to.y))
+          if (!f.isEmpty || f.isLocked) return false
+        }
+      } else if (from.y < to.y) {
+        for (between <- from.y + 1 until to.y){
+          val f = gb.get(Coordinates(to.x, between))
+          if (!f.isEmpty || f.isLocked) return false
+        }
+      } else if (from.y > to.y) {
+        for (between <- to.y + 1 until from.y){
+          val f = gb.get(Coordinates(to.x, between))
+          if (!f.isEmpty || f.isLocked) return false
+        }
+      }
+    } else if ((from.x > to.x + 1 || from.x < to.x - 1) || (from.y > to.y + 1 || from.y < to.y - 1)) {
       return false
     }
 
-    //Figure on the field is not movable
-    if (field.figure.isMovable) {
+    true
+  }
+
+  def switchPlayers(): Unit = {
+    if (currentPlayer == playerOne) {
+      currentPlayer = playerTwo
+    } else if (currentPlayer == playerTwo) {
+      currentPlayer = playerOne
+    }
+  }
+
+  def unset(coord:Coordinates): Boolean = {
+    val field = gb.get(coord)
+    if(!field.isEmpty && !field.isLocked) {
+      gb.set(coord, None)
+      currentPlayer.remainingFigures(field.figure.strength) += 1
+      true
+    }
+    false
+  }
+
+  def get(coord:Coordinates): Field = {
+    gb.get(coord)
+  }
+
+  def set(coord:Coordinates): Boolean = {
+    if (!canSet(coord)) return false
+
+    gb.set(coord, Some(currentPlayer.selectedFigure))
+    currentPlayer.placedFigure()
+
+    if (!currentPlayer.hasUnplacedFigures){
+      switchPlayers()
+    }
+
+    true
+  }
+
+  def canSet(coord:Coordinates): Boolean = {
+    if (coord.x > GameBoard.BoardSize || coord.x < 1 || coord.y > GameBoard.BoardSize || coord.y < 1) {
+      return false
+    }
+
+    if (currentPlayer.selectedFigure == null){
+      return false
+    }
+
+    if (currentPlayer == playerOne && coord.y < 7) {
+      return false
+    }
+
+    if (currentPlayer == playerTwo && coord.y > 4) {
       return false
     }
 
     //Blocked fields
-    if (to.x == 4 || to.x == 5) {
-      to.y match {
-        case 3 | 4 | 7 | 8 => return false
-      }
+    if (gb.get(coord).isLocked || !gb.get(coord).isEmpty) {
+      return false
     }
 
-    //Field is empty
-    if (gb.get(to).isEmpty) {
-      //TODO
-    }
     true
+  }
+}
+
+object GameEngine {
+  var board: GameBoard = new GameBoard()
+  var engine = GameEngine(board, Player("Joshua"), Player("Lorenz"))
+
+  def main(args: Array[String]): Unit = {
+    new StrategoTUI().start()
   }
 }
