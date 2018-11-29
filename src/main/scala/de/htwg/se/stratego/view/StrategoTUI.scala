@@ -1,17 +1,13 @@
 package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
-import de.htwg.se.stratego.model.{Coordinates, GameBoard, Player}
+import de.htwg.se.stratego.model._
 
 import scala.io.StdIn
 
 class StrategoTUI {
   var engine: GameEngine = GameEngine.engine
   var board: GameBoard = GameEngine.board
-
-  def main(args: Array[String]): Unit = {
-    start()
-  }
 
   def start() {
     println()
@@ -37,7 +33,49 @@ class StrategoTUI {
     println("11: Bomb")
     println()
 
-    mainLoop(board)
+    playerPreparation(engine.playerOne)
+    playerPreparation(engine.playerTwo)
+
+    mainLoop()
+  }
+
+  def playerPreparation(player:Player): Unit = {
+    println("Hey " + player.name + "! Select a figure and place it somewhere " +
+      "with \"select <STRENGTH>\" and \"set <X> <Y>\".")
+
+    printPrompt(player)
+
+    while (player.hasUnplacedFigures) {
+      var line : String = ""
+      if (!{line = StdIn.readLine(); line}.isEmpty) {
+        val params = line.split(" ")
+        params match {
+          case Array("set", x, y) if x.forall(_.isDigit) && y.forall(_.isDigit) =>
+            if (player.selectedFigure != null) {
+              if (!engine.set(Coordinates(x.toInt, y.toInt))){
+                println(Console.RED + "Couldn't place " + player.selectedFigure.description + Console.RESET)
+              }
+            } else {
+              println("No Figure selected")
+            }
+
+          case Array("select", fig) if fig.forall(_.isDigit) =>
+            val strength = fig.toInt
+            if (!player.selectFigure(strength)) {
+              println("You don't have any Figures of this strength")
+            }
+          case Array("show", _*) =>
+            println(board)
+          case Array("exit", _*) =>
+            println(Console.RED + player.name + " surrendered" + Console.RESET)
+            engine.exit()
+          case _ =>
+            println("Available Commands:")
+            println("show, select <STRENGTH>, set <X> <Y>, exit")
+        }
+        printPrompt(player)
+      }
+    }
   }
 
   def printPrompt(player: Player): Unit ={
@@ -49,10 +87,7 @@ class StrategoTUI {
     }
   }
 
-
-  def mainLoop(board: GameBoard) {
-    print(Console.RED + Console.BOLD + "stratego> " + Console.RESET)
-
+  def mainLoop(): Unit ={
     var line : String = ""
     while (!{line = StdIn.readLine(); line}.isEmpty) {
       val params = line.split(" ")
@@ -78,5 +113,4 @@ class StrategoTUI {
       printPrompt(engine.currentPlayer)
     }
   }
-
 }
