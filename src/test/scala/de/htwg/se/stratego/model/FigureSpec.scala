@@ -1,8 +1,10 @@
 package de.htwg.se.stratego.model
 
+import de.htwg.se.stratego
+import de.htwg.se.stratego.model
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class FigureSpec extends WordSpec with Matchers {
@@ -143,6 +145,26 @@ class FigureSpec extends WordSpec with Matchers {
     val fig = new Figure.Bomb(p)
     "return the correct movability" in {
       fig.isMovable should be(false)
+    }
+  }}
+
+  "A Figure" when { "tested to beat a stronger figure" should {
+    val a = Player("Player A")
+    val fig = new Figure.Lieutenant(a)
+    val b = Player("Player B")
+    val secondFig = new Figure.Marshal(b)
+    "not be able to beat it" in {
+      fig.canBeat(secondFig) should be(false)
+    }
+  }}
+
+  "A Figure" when { "tested to beat a weaker figure" should {
+    val a = Player("Player A")
+    val fig = new Figure.Marshal(a)
+    val b = Player("Player B")
+    val secondFig = new Figure.Lieutenant(b)
+    "be able to beat it" in {
+      fig.canBeat(secondFig) should be(true)
     }
   }}
 

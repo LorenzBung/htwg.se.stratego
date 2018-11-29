@@ -1,8 +1,8 @@
 package de.htwg.se.stratego.model
 
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class GameBoardSpec extends WordSpec with Matchers {
