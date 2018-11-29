@@ -1,4 +1,5 @@
 coverageEnabled := true
+coverageExcludedPackages := "de.htwg.se.stratego.view.*;"
 
 name          := "htwg.se.stratego"
 organization  := "de.htwg.se"
