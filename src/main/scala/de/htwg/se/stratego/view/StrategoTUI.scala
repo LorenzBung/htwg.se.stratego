@@ -2,10 +2,13 @@ package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
 import de.htwg.se.stratego.model._
+import de.htwg.se.stratego.view.StrategoGUI.{board, engine}
+import scalafx.application.Platform
+import scalafx.scene.paint.Color
 
 import scala.io.StdIn
 
-class StrategoTUI {
+class StrategoTUI extends Observer[Observable] {
   var engine: GameEngine = GameEngine.engine
   var board: GameBoard = GameEngine.board
 
@@ -33,6 +36,10 @@ class StrategoTUI {
     println("11: Bomb")
     println()
 
+    engine.playerOne.addObserver(this)
+    engine.playerTwo.addObserver(this)
+    board.addObserver(this)
+
     playerPreparation(engine.playerOne)
     playerPreparation(engine.playerTwo)
 
@@ -52,7 +59,9 @@ class StrategoTUI {
         params match {
           case Array("set", x, y) if x.forall(_.isDigit) && y.forall(_.isDigit) =>
             if (player.selectedFigure != null) {
-              if (!engine.set(Coordinates(x.toInt, y.toInt))){
+              if (engine.set(Coordinates(x.toInt, y.toInt))){
+                print("Placed")
+              } else {
                 println(Console.RED + "Couldn't place " + player.selectedFigure.description + Console.RESET)
               }
             } else {
@@ -61,19 +70,24 @@ class StrategoTUI {
 
           case Array("select", fig) if fig.forall(_.isDigit) =>
             val strength = fig.toInt
-            if (!player.selectFigure(strength)) {
+            if (player.selectFigure(strength)) {
+              print("Selected")
+            }else{
               println("You don't have any Figures of this strength")
+              printPrompt(player)
             }
           case Array("show", _*) =>
             println(board)
+            printPrompt(player)
           case Array("exit", _*) =>
             println(Console.RED + player.name + " surrendered" + Console.RESET)
             engine.exit()
           case _ =>
             println("Available Commands:")
             println("show, select <STRENGTH>, set <X> <Y>, exit")
+            printPrompt(player)
         }
-        printPrompt(player)
+
       }
     }
   }
@@ -96,12 +110,12 @@ class StrategoTUI {
         case Array("show", _*) =>
           println(board)
 
-        case Array("move", a, b, c, d) =>
-          val x1 = a.toInt
-          val y1 = b.toInt
-          val x2 = c.toInt
-          val y2 = d.toInt
-          engine.move(Coordinates(x1,y1), Coordinates(x2,y2))
+          case Array("move", a, b, c, d) =>
+            val x1 = a.toInt
+            val y1 = b.toInt
+            val x2 = c.toInt
+            val y2 = d.toInt
+            engine.move(Coordinates(x1,y1), Coordinates(x2,y2))
 
         case Array("exit", _*) =>
           engine.exit()
@@ -112,5 +126,15 @@ class StrategoTUI {
       }
       printPrompt(engine.currentPlayer)
     }
+  }
+
+  override def receiveUpdate(subject: Observable): Unit = {
+      if(subject.isInstanceOf[Player]){
+        var player = subject.asInstanceOf[Player]
+        Platform.runLater {
+          println()
+          printPrompt(player)
+        }
+      }
   }
 }

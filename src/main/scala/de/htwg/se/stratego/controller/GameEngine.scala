@@ -1,8 +1,14 @@
 package de.htwg.se.stratego.controller
+
+import de.htwg.se.stratego.model
 import de.htwg.se.stratego.model._
-import de.htwg.se.stratego.view.StrategoTUI
+import de.htwg.se.stratego.view.StrategoGUI.board
+import de.htwg.se.stratego.view.{AlertView, StrategoGUI, StrategoTUI}
+import javafx.scene.control.Dialog
+import scalafx.scene.Scene
 import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
+import scalafx.stage.Stage
 
 case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
   var currentPlayer:Player = playerOne
@@ -35,6 +41,7 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
 
     // Attacker must be the current player, cannot beat own figures
     if (defender.player == currentPlayer) return false
+
 
     //Field is empty OR has figure of other player on it
     if (attacker.strength == Figure.MINER && defender.strength == Figure.BOMB) {
@@ -121,8 +128,9 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
   def get(coord:Coordinates): Field = {
     gb.get(coord)
   }
-
+  
   def set(coord:Coordinates): Boolean = {
+
     if (!canSet(coord)) return false
 
     gb.set(coord, Some(currentPlayer.selectedFigure))
@@ -166,6 +174,21 @@ object GameEngine {
   var engine = GameEngine(board, Player("Joshua"), Player("Lorenz"))
 
   def main(args: Array[String]): Unit = {
-    new StrategoTUI().start()
+
+    val tuiThread = new Thread {
+      override def run() {
+        new StrategoTUI().start()
+      }
+    }
+
+    tuiThread.start()
+
+    val guiThread = new Thread {
+      override def run() {
+        StrategoGUI.main(null)
+      }
+    }
+
+    guiThread.start()
   }
 }

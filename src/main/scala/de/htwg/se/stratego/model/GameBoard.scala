@@ -1,9 +1,10 @@
 package de.htwg.se.stratego.model
 
-class GameBoard(fields: Array[Array[Field]]) {
+class GameBoard(fields: Array[Array[Field]]) extends Observable with Subject[Observable] {
 
   def set(coords: Coordinates, figure: Option[Figure]): Unit = {
     fields(coords.y - 1)(coords.x - 1).setFigure(figure)
+    notifyObservers()
   }
 
   def this() {
@@ -26,6 +27,7 @@ class GameBoard(fields: Array[Array[Field]]) {
   def move(from: Coordinates, to: Coordinates): Unit = {
     set(to, Some(get(from).figure))
     set(from, None)
+    notifyObservers()
   }
 
   def matrix: Array[Array[Field]] = {

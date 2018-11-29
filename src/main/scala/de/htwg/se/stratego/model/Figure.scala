@@ -4,6 +4,10 @@ abstract case class Figure(player: Player, strength:Int, description:String) {
   require(strength <= 11 && strength >= 0, "strength must be between 0 and 11")
   val movable:Boolean = true
 
+  def canBeat(fig: Figure): Boolean = {
+    ((this.strength == Figure.MINER && fig.strength != Figure.BOMB) || this.strength >= fig.strength) && this.player != fig.player
+  }
+
   def isMovable: Boolean = {
     this.movable
   }
