@@ -40,7 +40,7 @@ object StrategoGUI extends JFXApp with Observer[Observable] {
 
   stage = new JFXApp.PrimaryStage {
     title.value = "Stratego - SE Project - Lorenz Bung & Joshua Rutschmann"
-    icons += new Image("stratego.png")
+    icons.add(new Image("stratego.png"))
     resizable = false
     scene = new Scene {
       fill = LightGray

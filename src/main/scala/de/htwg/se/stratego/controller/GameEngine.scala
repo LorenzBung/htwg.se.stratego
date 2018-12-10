@@ -1,14 +1,18 @@
 package de.htwg.se.stratego.controller
 
 import de.htwg.se.stratego.model
+import de.htwg.se.stratego.model.Figure.{Marshal, Spy}
 import de.htwg.se.stratego.model._
 import de.htwg.se.stratego.view.StrategoGUI.board
 import de.htwg.se.stratego.view.{AlertView, StrategoGUI, StrategoTUI}
+import javafx.event.EventHandler
 import javafx.scene.control.Dialog
+import scalafx.application.Platform
+import scalafx.event.EventHandler
 import scalafx.scene.Scene
 import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
-import scalafx.stage.Stage
+import scalafx.stage.{Stage, WindowEvent}
 
 case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
   var currentPlayer:Player = playerOne
@@ -69,8 +73,11 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
       gb.set(to, None)
     }
 
-    switchPlayers()
-
+    Platform.runLater {
+      StrategoGUI.stage.hide()
+      new AlertView(attacker, defender).showAndWait()
+      switchPlayers()
+    }
     true
   }
 
@@ -113,6 +120,13 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
     } else if (currentPlayer == playerTwo) {
       currentPlayer = playerOne
     }
+
+    Platform.runLater {
+      StrategoGUI.stage.hide()
+      new Alert(AlertType.Information, "Please hand over to " + currentPlayer.name).showAndWait()
+      StrategoGUI.stage.show()
+    }
+
   }
 
   def unset(coord:Coordinates): Boolean = {
