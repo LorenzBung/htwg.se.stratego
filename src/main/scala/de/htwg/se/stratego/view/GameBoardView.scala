@@ -1,10 +1,9 @@
 package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
-import de.htwg.se.stratego.model.{Coordinates, Field}
-import de.htwg.se.stratego.view.StrategoGUI._
-import scalafx.geometry.Insets
+import de.htwg.se.stratego.model.boardComponent.{Coordinates, Field}
 import scalafx.Includes._
+import scalafx.geometry.Insets
 import scalafx.scene.image.ImageView
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{Background, BackgroundFill, BorderPane, GridPane}
@@ -39,13 +38,13 @@ class GameBoardView(engine:GameEngine) extends GridPane {
             if(!field.isEmpty) {
               center = new BorderPane {
 
-                center = new ImageView(if (field.figure.player == engine.currentPlayer) field.figure.strength + ".png" else "stratego.png") {
+                center = new ImageView(if (field.figure.player == engine.gb.currentPlayer) field.figure.strength + ".png" else "stratego.png") {
                   fitWidth = 42
                   preserveRatio = true
                   smooth = true
                 }
                 maxWidth = 50
-                if (field.figure.player == engine.playerOne) {
+                if (field.figure.player == engine.gb.playerOne) {
                   style = "-fx-background-radius: 8px; -fx-background-color:red;"
                 } else {
                   style = "-fx-background-radius: 8px; -fx-background-color:blue;"
@@ -54,22 +53,21 @@ class GameBoardView(engine:GameEngine) extends GridPane {
             }
           }
 
-          onMouseEntered = (event: MouseEvent) => {
+          onMouseEntered = (_event: MouseEvent) => {
             if (engine.canSet(Coordinates(i,j))) {
-              var hoverColor = if (engine.currentPlayer == engine.playerOne) Color.Red else Color.Blue
+              var hoverColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
               background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
             }
           }
 
-          onMouseExited = (event: MouseEvent) => {
-            if (!field.isLocked && engine.currentPlayer.hasUnplacedFigures) {
+          onMouseExited = (_event: MouseEvent) => {
+            if (!field.isLocked && engine.gb.currentPlayer.hasUnplacedFigures) {
               background = new Background(Array(new BackgroundFill(Color.LightGray, null, null)))
             }
           }
 
           onMouseClicked = (event: MouseEvent) => {
-            if (engine.currentPlayer.hasUnplacedFigures){
-
+            if (engine.gb.currentPlayer.hasUnplacedFigures){
               if (event.button == MouseButton.Primary) {
                 engine.set(Coordinates(i,j))
               } else if (event.button == MouseButton.Secondary) {

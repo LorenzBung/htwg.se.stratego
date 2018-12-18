@@ -1,12 +1,11 @@
 package de.htwg.se.stratego.view
-import de.htwg.se.stratego.model.Figure.{Bomb, Spy}
-import de.htwg.se.stratego.model._
+import de.htwg.se.stratego.model.boardComponent.Figure
 import scalafx.geometry.Pos
 import scalafx.scene.Scene
 import scalafx.scene.control.Label
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.layout.{BorderPane, HBox, VBox}
-import scalafx.scene.paint.Color.{Blue, LightGray, Red}
+import scalafx.scene.layout.{HBox, VBox}
+import scalafx.scene.paint.Color.{LightGray, Red}
 import scalafx.stage.Stage
 
 class AlertView(attacker: Figure, defender: Figure) extends Stage {

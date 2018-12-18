@@ -1,4 +1,6 @@
-package de.htwg.se.stratego.model
+package de.htwg.se.stratego.model.boardComponent
+
+import de.htwg.se.stratego.model.Player
 
 abstract case class Figure(player: Player, strength:Int, description:String) {
   require(strength <= 11 && strength >= 0, "strength must be between 0 and 11")

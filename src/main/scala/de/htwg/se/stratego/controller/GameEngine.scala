@@ -1,21 +1,14 @@
 package de.htwg.se.stratego.controller
 
-import de.htwg.se.stratego.model
-import de.htwg.se.stratego.model.Figure.{Marshal, Spy}
 import de.htwg.se.stratego.model._
-import de.htwg.se.stratego.view.StrategoGUI.board
+import de.htwg.se.stratego.model.boardComponent._
 import de.htwg.se.stratego.view.{AlertView, StrategoGUI, StrategoTUI}
-import javafx.event.EventHandler
-import javafx.scene.control.Dialog
 import scalafx.application.Platform
-import scalafx.event.EventHandler
-import scalafx.scene.Scene
 import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
-import scalafx.stage.{Stage, WindowEvent}
 
-case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
-  var currentPlayer:Player = playerOne
+class GameEngine extends Subject[GameEngine] {
+  var gb: GameBoardInterface = new GameBoard()
 
   def exit(): Unit = {
     System.exit(0)
@@ -33,7 +26,7 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
 
     val attacker: Figure = gb.get(from).figure
 
-    if (!canMove(from, to) || !attacker.isMovable || attacker.player != currentPlayer) return false
+    if (!canMove(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) return false
 
     if (gb.get(to).isEmpty) {
       gb.move(from, to)
@@ -44,7 +37,7 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
     val defender: Figure = gb.get(to).figure
 
     // Attacker must be the current player, cannot beat own figures
-    if (defender.player == currentPlayer) return false
+    if (defender.player == gb.currentPlayer) return false
 
 
     //Field is empty OR has figure of other player on it
@@ -115,25 +108,27 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
   }
 
   def switchPlayers(): Unit = {
-    if (currentPlayer == playerOne) {
-      currentPlayer = playerTwo
-    } else if (currentPlayer == playerTwo) {
-      currentPlayer = playerOne
+    if (gb.currentPlayer == gb.playerOne) {
+      gb.currentPlayer = gb.playerTwo
+    } else if (gb.currentPlayer == gb.playerTwo) {
+      gb.currentPlayer = gb.playerOne
     }
 
     Platform.runLater {
       StrategoGUI.stage.hide()
-      new Alert(AlertType.Information, "Please hand over to " + currentPlayer.name).showAndWait()
+      new Alert(AlertType.Information, "Please hand over to " + gb.currentPlayer.name).showAndWait()
       StrategoGUI.stage.show()
     }
 
+    notifyObservers()
   }
 
   def unset(coord:Coordinates): Boolean = {
     val field = gb.get(coord)
     if(!field.isEmpty && !field.isLocked) {
       gb.set(coord, None)
-      currentPlayer.remainingFigures(field.figure.strength) += 1
+      gb.currentPlayer.remainingFigures(field.figure.strength) += 1
+      notifyObservers()
       true
     }
     false
@@ -144,13 +139,12 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
   }
   
   def set(coord:Coordinates): Boolean = {
-
     if (!canSet(coord)) return false
+    gb.set(coord, Some(gb.currentPlayer.selectedFigure))
+    gb.currentPlayer.placedFigure()
+    notifyObservers()
 
-    gb.set(coord, Some(currentPlayer.selectedFigure))
-    currentPlayer.placedFigure()
-
-    if (!currentPlayer.hasUnplacedFigures){
+    if(!gb.currentPlayer.hasUnplacedFigures){
       switchPlayers()
     }
 
@@ -158,19 +152,19 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
   }
 
   def canSet(coord:Coordinates): Boolean = {
-    if (coord.x > GameBoard.BoardSize || coord.x < 1 || coord.y > GameBoard.BoardSize || coord.y < 1) {
+    if (coord.x > GameBoard.BOARDSIZE || coord.x < 1 || coord.y > GameBoard.BOARDSIZE || coord.y < 1) {
       return false
     }
 
-    if (currentPlayer.selectedFigure == null){
+    if (gb.currentPlayer.selectedFigure == null){
       return false
     }
 
-    if (currentPlayer == playerOne && coord.y < 7) {
+    if (gb.currentPlayer == gb.playerOne && coord.y < 7) {
       return false
     }
 
-    if (currentPlayer == playerTwo && coord.y > 4) {
+    if (gb.currentPlayer == gb.playerTwo && coord.y > 4) {
       return false
     }
 
@@ -181,11 +175,19 @@ case class GameEngine(gb: GameBoard, playerOne:Player, playerTwo:Player) {
 
     true
   }
+
+  def selectFigure(player: Player, strength: Int):Boolean = {
+    if (strength <= Figure.BOMB && strength >= Figure.FLAG && player.remainingFigures(strength) != 0) {
+      player.selectedFigure = Figure.withStrength(player, strength)
+      notifyObservers()
+      return true
+    }
+    false
+  }
 }
 
 object GameEngine {
-  var board: GameBoard = new GameBoard()
-  var engine = GameEngine(board, Player("Joshua"), Player("Lorenz"))
+  var engine = new GameEngine()
 
   def main(args: Array[String]): Unit = {
 

@@ -1,5 +1,6 @@
 package de.htwg.se.stratego.model
 
+import de.htwg.se.stratego.model.boardComponent.Figure
 import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -35,17 +36,14 @@ class PlayerSpec extends WordSpec with Matchers {
   "A Player" when { "selecting a figure" should {
     val p = new Player("Test Player")
     "select the correct one" in {
-      p.selectFigure(3)
+      p.selectedFigure = Figure.withStrength(p, 3)
       p.selectedFigure should be(Figure.withStrength(p, 3))
-    }
-    "not be able to if it doesn't exist" in {
-      p.selectFigure(-1) should be(false)
     }
   }}
 
   "A Player" when { "placing figures" should {
     val p = new Player("Test Player")
-    p.selectFigure(8)
+    p.selectedFigure = Figure.withStrength(p, 8)
     "get one less if he has some left" in {
       p.placedFigure()
       p.remainingFigures(8) should be(1)

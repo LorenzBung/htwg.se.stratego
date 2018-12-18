@@ -1,11 +1,10 @@
 package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
-import de.htwg.se.stratego.model.{Coordinates, Field, Figure}
-import de.htwg.se.stratego.view.StrategoGUI._
 import scalafx.geometry.Insets
 import scalafx.Includes._
 import scalafx.scene.image.ImageView
+import scalafx.scene.input.{MouseDragEvent, MouseEvent}
 import scalafx.scene.layout._
 import scalafx.scene.paint.Color
 import scalafx.scene.paint.Color._
@@ -25,14 +24,14 @@ class FigureSelectionView(engine: GameEngine) extends HBox {
 
       def update(): Unit ={
 
-        if(engine.currentPlayer.selectedFigure != null && engine.currentPlayer.selectedFigure.strength == j){
-          var selectColor = if (engine.currentPlayer == engine.playerOne) Color.Red else Color.Blue
+        if(engine.gb.currentPlayer.selectedFigure != null && engine.gb.currentPlayer.selectedFigure.strength == j){
+          var selectColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
           background = new Background(Array(new BackgroundFill(selectColor, null, null)))
         } else {
           background = new Background(Array(new BackgroundFill(Transparent, null, null)))
         }
 
-        if (engine.currentPlayer.remainingFigures(j) == 0) {
+        if (engine.gb.currentPlayer.remainingFigures(j) == 0) {
           enabled = false
           opacity = 0.5
           background = new Background(Array(new BackgroundFill(Transparent, null, null)))
@@ -47,22 +46,22 @@ class FigureSelectionView(engine: GameEngine) extends HBox {
         }
       }
 
-      onMouseEntered = () => {
+      onMouseEntered = (_event: MouseEvent) => {
         if (enabled) {
           scaleX = 1.2
           scaleY = 1.2
         }
       }
 
-      onMouseExited = () => {
+      onMouseExited = (_event: MouseEvent) => {
         scaleX = 1
         scaleY = 1
       }
 
-      onMouseClicked = () => {
+      onMouseClicked = (_event: MouseEvent) => {
         if (enabled){
           clearFigureSelection()
-          engine.currentPlayer.selectFigure(j)
+          engine.selectFigure(engine.gb.currentPlayer, j)
         }
       }
     }

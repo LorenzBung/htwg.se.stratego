@@ -2,15 +2,14 @@ package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
 import de.htwg.se.stratego.model._
-import de.htwg.se.stratego.view.StrategoGUI.{board, engine}
+import de.htwg.se.stratego.model.boardComponent.{Coordinates, GameBoardInterface}
 import scalafx.application.Platform
-import scalafx.scene.paint.Color
 
 import scala.io.StdIn
 
-class StrategoTUI extends Observer[Observable] {
+class StrategoTUI extends Observer[GameEngine] {
   var engine: GameEngine = GameEngine.engine
-  var board: GameBoard = GameEngine.board
+  var board: GameBoardInterface = GameEngine.engine.gb
 
   def start() {
     println()
@@ -36,12 +35,10 @@ class StrategoTUI extends Observer[Observable] {
     println("11: Bomb")
     println()
 
-    engine.playerOne.addObserver(this)
-    engine.playerTwo.addObserver(this)
-    board.addObserver(this)
+    engine.addObserver(this)
 
-    playerPreparation(engine.playerOne)
-    playerPreparation(engine.playerTwo)
+    playerPreparation(engine.gb.playerOne)
+    playerPreparation(engine.gb.playerTwo)
 
     mainLoop()
   }
@@ -70,7 +67,7 @@ class StrategoTUI extends Observer[Observable] {
 
           case Array("select", fig) if fig.forall(_.isDigit) =>
             val strength = fig.toInt
-            if (player.selectFigure(strength)) {
+            if (engine.selectFigure(player, strength)) {
               print("Selected")
             }else{
               println("You don't have any Figures of this strength")
@@ -93,7 +90,7 @@ class StrategoTUI extends Observer[Observable] {
   }
 
   def printPrompt(player: Player): Unit ={
-    var playerColor = if (engine.currentPlayer == engine.playerOne) Console.RED else Console.BLUE
+    var playerColor = if (board.currentPlayer == engine.gb.playerOne) Console.RED else Console.BLUE
     if (player.selectedFigure != null){
       print(playerColor + player.name + Console.RESET + " " + player.selectedFigure.description + " (" + player.remainingFigures(player.selectedFigure.strength) +" left)> " + Console.RESET)
     } else {
@@ -124,11 +121,11 @@ class StrategoTUI extends Observer[Observable] {
           println("Available Commands:")
           println("show, move <X1> <Y1> <X2> <Y2>, exit")
       }
-      printPrompt(engine.currentPlayer)
+      printPrompt(board.currentPlayer)
     }
   }
 
-  override def receiveUpdate(subject: Observable): Unit = {
+  override def receiveUpdate(subject: GameEngine): Unit = {
       if(subject.isInstanceOf[Player]){
         var player = subject.asInstanceOf[Player]
         Platform.runLater {

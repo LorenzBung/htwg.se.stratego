@@ -2,6 +2,8 @@ package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
 import de.htwg.se.stratego.model._
+import de.htwg.se.stratego.model.boardComponent.{GameBoard, GameBoardInterface}
+import de.htwg.se.sudoku.model.fileIoComponent.fileIoXmlImpl.FileIO
 
 import scala.collection.mutable.ListBuffer
 import scalafx.Includes._
@@ -9,7 +11,7 @@ import scalafx.application.{JFXApp, Platform}
 import scalafx.scene.Scene
 import scalafx.scene.layout._
 import scalafx.geometry.{Insets, Pos}
-import scalafx.scene.control.Label
+import scalafx.scene.control.{Button, Label}
 import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.input.{MouseButton, MouseDragEvent, MouseEvent}
 import scalafx.scene.paint.Color._
@@ -17,8 +19,7 @@ import scalafx.scene.shape.{Rectangle, Shape}
 import scalafx.scene.text.Font
 import scalafx.stage.WindowEvent
 
-object StrategoGUI extends JFXApp with Observer[Observable] {
-  var board:GameBoard = GameEngine.board
+object StrategoGUI extends JFXApp with Observer[GameEngine] {
   var engine:GameEngine = GameEngine.engine
   var gameBoardView = new GameBoardView(engine)
   var figureSelectionView = new FigureSelectionView(engine)
@@ -30,13 +31,18 @@ object StrategoGUI extends JFXApp with Observer[Observable] {
   var playerNameLabel:Label = new Label("") {
     font = Font.apply(30)
     alignmentInParent = Pos.CenterRight
+    if (engine.gb.currentPlayer == engine.gb.playerOne) {
+      textFill = Red
+    } else {
+      textFill = Blue
+    }
+
+    text = engine.gb.currentPlayer.name
   }
 
   gameBoardView.loadBoard()
 
-  engine.playerOne.addObserver(this)
-  engine.playerTwo.addObserver(this)
-  board.addObserver(this)
+  engine.addObserver(this)
 
   stage = new JFXApp.PrimaryStage {
     title.value = "Stratego - SE Project - Lorenz Bung & Joshua Rutschmann"
@@ -48,6 +54,18 @@ object StrategoGUI extends JFXApp with Observer[Observable] {
         alignment = Pos.Center
         children = Seq(new BorderPane {
           left = playerNameLabel
+          center = new HBox {
+            alignment = Pos.Center
+            children = Seq(new Button ("Load Game") {
+              onMouseClicked = (_: MouseEvent) => {
+                GameEngine.engine.gb = new FileIO().load.get;
+                gameBoardView.loadBoard()
+                figureSelectionView.updateFigures()
+              }
+            },new Button ("Save Game") {
+              onMouseClicked = (_: MouseEvent) => { new FileIO().saveXML(engine.gb) }
+            })
+          }
           right = figureNameLabel
           margin = Insets(10,50,0,50)
         }, gameBoardView,  figureSelectionView)
@@ -56,31 +74,24 @@ object StrategoGUI extends JFXApp with Observer[Observable] {
     onCloseRequest() = (_: WindowEvent) => { engine.exit() }
   }
 
-  override def receiveUpdate(subject: Observable): Unit = {
-    if(subject.isInstanceOf[GameBoard]){
+  override def receiveUpdate(subject: GameEngine): Unit = {
       Platform.runLater {
         gameBoardView.loadBoard()
         figureSelectionView.updateFigures()
 
-        if (engine.currentPlayer == engine.playerOne) {
+        if (engine.gb.currentPlayer == engine.gb.playerOne) {
           playerNameLabel.textFill = Red
         } else {
           playerNameLabel.textFill = Blue
         }
 
-        playerNameLabel.text = engine.currentPlayer.name
-      }
-    } else if (subject.isInstanceOf[Player]) {
-      var player = subject.asInstanceOf[Player]
-      Platform.runLater {
-        figureSelectionView.updateFigures()
+        playerNameLabel.text = engine.gb.currentPlayer.name
 
-        if (player.selectedFigure != null) {
-          figureNameLabel.text = player.selectedFigure.description
+        if (engine.gb.currentPlayer.selectedFigure != null) {
+          figureNameLabel.text = engine.gb.currentPlayer.selectedFigure.description
         } else {
           figureNameLabel.text = "Pick a Figure"
         }
       }
-    }
   }
 }

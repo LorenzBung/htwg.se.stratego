@@ -1,6 +1,8 @@
 package de.htwg.se.stratego.model
 
-case class Player(name: String) extends Observable with Subject[Observable] {
+import de.htwg.se.stratego.model.boardComponent.Figure
+
+case class Player(name: String) {
 
   val remainingFigures = scala.collection.mutable.Map(
     Figure.FLAG -> 1,
@@ -24,8 +26,6 @@ case class Player(name: String) extends Observable with Subject[Observable] {
   def placedFigure(): Unit = {
     this.remainingFigures(this.selectedFigure.strength) -= 1
 
-    notifyObservers()
-
     if (this.remainingFigures(this.selectedFigure.strength) == 0) {
       this.selectedFigure = null
     }
@@ -34,15 +34,6 @@ case class Player(name: String) extends Observable with Subject[Observable] {
   def hasUnplacedFigures:Boolean = {
     for ((_,v) <- this.remainingFigures){
       if (v != 0) return true
-    }
-    false
-  }
-
-  def selectFigure(strength: Int):Boolean = {
-    if (strength <= Figure.BOMB && strength >= Figure.FLAG && this.remainingFigures(strength) != 0) {
-      selectedFigure = Figure.withStrength(this, strength)
-      notifyObservers()
-      return true
     }
     false
   }

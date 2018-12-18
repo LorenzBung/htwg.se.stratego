@@ -2,6 +2,7 @@ package de.htwg.se.stratego.model
 
 import de.htwg.se.stratego
 import de.htwg.se.stratego.model
+import de.htwg.se.stratego.model.boardComponent.Figure
 import org.junit.runner.RunWith
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatest.junit.JUnitRunner

@@ -1,14 +1,18 @@
-package de.htwg.se.stratego.model
+package de.htwg.se.stratego.model.boardComponent
 
-class GameBoard(fields: Array[Array[Field]]) extends Observable with Subject[Observable] {
+import de.htwg.se.stratego.model._
+
+class GameBoard(fields: Array[Array[Field]]) extends GameBoardInterface {
+  var playerOne = Player("Player 1")
+  var playerTwo = Player("Player 2")
+  var currentPlayer:Player = playerOne
 
   def set(coords: Coordinates, figure: Option[Figure]): Unit = {
     fields(coords.y - 1)(coords.x - 1).setFigure(figure)
-    notifyObservers()
   }
 
   def this() {
-    this(Array.tabulate(GameBoard.BoardSize, GameBoard.BoardSize)((x,y) => {
+    this(Array.tabulate(GameBoard.BOARDSIZE, GameBoard.BOARDSIZE)((x,y) => {
       val field = new Field()
 
       if (x == 4 || x == 5) y match {
@@ -27,7 +31,6 @@ class GameBoard(fields: Array[Array[Field]]) extends Observable with Subject[Obs
   def move(from: Coordinates, to: Coordinates): Unit = {
     set(to, Some(get(from).figure))
     set(from, None)
-    notifyObservers()
   }
 
   def matrix: Array[Array[Field]] = {
@@ -59,5 +62,5 @@ class GameBoard(fields: Array[Array[Field]]) extends Observable with Subject[Obs
 }
 
 object GameBoard {
-  val BoardSize = 10
+  val BOARDSIZE = 10
 }

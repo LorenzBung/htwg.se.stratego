@@ -1,6 +1,7 @@
 package de.htwg.se.stratego.controller
 
-import de.htwg.se.stratego.model.{Coordinates, Figure, GameBoard, Player}
+import de.htwg.se.stratego.model.Player
+import de.htwg.se.stratego.model.boardComponent.{Coordinates, GameBoard}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
@@ -9,9 +10,8 @@ import org.scalatest.{Matchers, WordSpec}
 class GameEngineSpec extends WordSpec with Matchers {
   "A GameEngine" when {
     val gb = new GameBoard()
-    val p1 = new Player("Player1")
-    val p2 = new Player("Player2")
-    val engine = new GameEngine(gb, p1, p2)
+    val engine = new GameEngine()
+    engine.gb = gb
     "exiting" should {
       "do it correctly" in {
         //TODO engine.exit() should be(())
@@ -30,14 +30,14 @@ class GameEngineSpec extends WordSpec with Matchers {
     }
     "switching players" should {
       "switch correctly from p1 to p2" in {
-        engine.currentPlayer = p1
+        gb.currentPlayer = gb.playerOne
         engine.switchPlayers()
-        engine.currentPlayer should be(p2)
+        gb.currentPlayer should be(gb.playerTwo)
       }
       "switch correctly from p2 to p1" in {
-        engine.currentPlayer = p2
+        gb.currentPlayer = gb.playerTwo
         engine.switchPlayers()
-        engine.currentPlayer should be(p1)
+        gb.currentPlayer should be(gb.playerOne)
       }
     }
     "removing a non-existing figure" should {
