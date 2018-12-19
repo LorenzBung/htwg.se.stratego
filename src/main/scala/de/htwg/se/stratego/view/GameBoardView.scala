@@ -54,14 +54,21 @@ class GameBoardView(engine:GameEngine) extends GridPane {
           }
 
           onMouseEntered = (_event: MouseEvent) => {
-            if (engine.canSet(Coordinates(i,j))) {
-              var hoverColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
-              background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
+            if (engine.gb.currentPlayer.hasUnplacedFigures){
+              if (engine.canSet(Coordinates(i,j))) {
+                var hoverColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
+                background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
+              }
+            } else {
+              if (from != null && engine.canMove(from, Coordinates(i,j))) {
+                var hoverColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
+                background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
+              }
             }
           }
 
           onMouseExited = (_event: MouseEvent) => {
-            if (!field.isLocked && engine.gb.currentPlayer.hasUnplacedFigures) {
+            if (!field.isLocked) {
               background = new Background(Array(new BackgroundFill(Color.LightGray, null, null)))
             }
           }

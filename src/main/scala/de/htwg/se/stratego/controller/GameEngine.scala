@@ -80,7 +80,7 @@ class GameEngine extends Subject[GameEngine] {
 
     if (gb.get(from).figure.strength == Figure.SCOUT) {
       if (from.x < to.x) {
-        for (between <- from.x + 1 until  to.x ){
+        for (between <- from.x + 1 until to.x ){
           val f = gb.get(Coordinates(between, to.y))
           if (!f.isEmpty || f.isLocked) return false
         }
@@ -140,7 +140,7 @@ class GameEngine extends Subject[GameEngine] {
   
   def set(coord:Coordinates): Boolean = {
     if (!canSet(coord)) return false
-    gb.set(coord, Some(gb.currentPlayer.selectedFigure))
+    gb.set(coord, gb.currentPlayer.selectedFigure)
     gb.currentPlayer.placedFigure()
     notifyObservers()
 
@@ -178,7 +178,7 @@ class GameEngine extends Subject[GameEngine] {
 
   def selectFigure(player: Player, strength: Int):Boolean = {
     if (strength <= Figure.BOMB && strength >= Figure.FLAG && player.remainingFigures(strength) != 0) {
-      player.selectedFigure = Figure.withStrength(player, strength)
+      player.selectedFigure = Some(Figure.withStrength(player, strength))
       notifyObservers()
       return true
     }

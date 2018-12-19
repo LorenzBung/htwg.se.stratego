@@ -2,20 +2,16 @@ package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
 import de.htwg.se.stratego.model._
-import de.htwg.se.stratego.model.boardComponent.{GameBoard, GameBoardInterface}
-import de.htwg.se.sudoku.model.fileIoComponent.fileIoXmlImpl.FileIO
-
-import scala.collection.mutable.ListBuffer
+import de.htwg.se.stratego.model.fileIoComponent.fileIoXmlImpl.FileIO
 import scalafx.Includes._
 import scalafx.application.{JFXApp, Platform}
-import scalafx.scene.Scene
-import scalafx.scene.layout._
 import scalafx.geometry.{Insets, Pos}
+import scalafx.scene.Scene
 import scalafx.scene.control.{Button, Label}
-import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.input.{MouseButton, MouseDragEvent, MouseEvent}
+import scalafx.scene.image.Image
+import scalafx.scene.input.MouseEvent
+import scalafx.scene.layout._
 import scalafx.scene.paint.Color._
-import scalafx.scene.shape.{Rectangle, Shape}
 import scalafx.scene.text.Font
 import scalafx.stage.WindowEvent
 
@@ -87,8 +83,8 @@ object StrategoGUI extends JFXApp with Observer[GameEngine] {
 
         playerNameLabel.text = engine.gb.currentPlayer.name
 
-        if (engine.gb.currentPlayer.selectedFigure != null) {
-          figureNameLabel.text = engine.gb.currentPlayer.selectedFigure.description
+        if (engine.gb.currentPlayer.selectedFigure.isDefined) {
+          figureNameLabel.text = engine.gb.currentPlayer.selectedFigure.get.description
         } else {
           figureNameLabel.text = "Pick a Figure"
         }

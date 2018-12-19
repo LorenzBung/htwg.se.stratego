@@ -24,7 +24,7 @@ class FigureSelectionView(engine: GameEngine) extends HBox {
 
       def update(): Unit ={
 
-        if(engine.gb.currentPlayer.selectedFigure != null && engine.gb.currentPlayer.selectedFigure.strength == j){
+        if(engine.gb.currentPlayer.selectedFigure.isDefined && engine.gb.currentPlayer.selectedFigure.get.strength == j){
           var selectColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
           background = new Background(Array(new BackgroundFill(selectColor, null, null)))
         } else {

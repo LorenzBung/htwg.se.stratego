@@ -55,11 +55,11 @@ class StrategoTUI extends Observer[GameEngine] {
         val params = line.split(" ")
         params match {
           case Array("set", x, y) if x.forall(_.isDigit) && y.forall(_.isDigit) =>
-            if (player.selectedFigure != null) {
+            if (player.selectedFigure.isDefined) {
               if (engine.set(Coordinates(x.toInt, y.toInt))){
                 print("Placed")
               } else {
-                println(Console.RED + "Couldn't place " + player.selectedFigure.description + Console.RESET)
+                println(Console.RED + "Couldn't place " + player.selectedFigure.get.description + Console.RESET)
               }
             } else {
               println("No Figure selected")
@@ -91,8 +91,8 @@ class StrategoTUI extends Observer[GameEngine] {
 
   def printPrompt(player: Player): Unit ={
     var playerColor = if (board.currentPlayer == engine.gb.playerOne) Console.RED else Console.BLUE
-    if (player.selectedFigure != null){
-      print(playerColor + player.name + Console.RESET + " " + player.selectedFigure.description + " (" + player.remainingFigures(player.selectedFigure.strength) +" left)> " + Console.RESET)
+    if (player.selectedFigure.isDefined){
+      print(playerColor + player.name + Console.RESET + " " + player.selectedFigure.get.description + " (" + player.remainingFigures(player.selectedFigure.get.strength) +" left)> " + Console.RESET)
     } else {
       print(playerColor + player.name + Console.RESET + "> ")
     }
@@ -126,12 +126,10 @@ class StrategoTUI extends Observer[GameEngine] {
   }
 
   override def receiveUpdate(subject: GameEngine): Unit = {
-      if(subject.isInstanceOf[Player]){
-        var player = subject.asInstanceOf[Player]
-        Platform.runLater {
-          println()
-          printPrompt(player)
-        }
-      }
+    var player = subject.gb.currentPlayer
+    Platform.runLater {
+      println()
+      printPrompt(player)
+    }
   }
 }

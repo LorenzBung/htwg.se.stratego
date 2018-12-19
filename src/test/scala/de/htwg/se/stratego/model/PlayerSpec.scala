@@ -5,8 +5,6 @@ import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
-import scala.collection.mutable
-
 @RunWith(classOf[JUnitRunner])
 class PlayerSpec extends WordSpec with Matchers {
 
@@ -36,14 +34,14 @@ class PlayerSpec extends WordSpec with Matchers {
   "A Player" when { "selecting a figure" should {
     val p = new Player("Test Player")
     "select the correct one" in {
-      p.selectedFigure = Figure.withStrength(p, 3)
+      p.selectedFigure = Some(Figure.withStrength(p, 3))
       p.selectedFigure should be(Figure.withStrength(p, 3))
     }
   }}
 
   "A Player" when { "placing figures" should {
     val p = new Player("Test Player")
-    p.selectedFigure = Figure.withStrength(p, 8)
+    p.selectedFigure = Some(Figure.withStrength(p, 8))
     "get one less if he has some left" in {
       p.placedFigure()
       p.remainingFigures(8) should be(1)

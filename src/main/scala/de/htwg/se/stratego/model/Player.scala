@@ -2,7 +2,7 @@ package de.htwg.se.stratego.model
 
 import de.htwg.se.stratego.model.boardComponent.Figure
 
-case class Player(name: String) {
+case class Player(name:String) {
 
   val remainingFigures = scala.collection.mutable.Map(
     Figure.FLAG -> 1,
@@ -21,21 +21,24 @@ case class Player(name: String) {
 
   override def toString:String = name
   var figures:List[Figure] = List[Figure]()
-  var selectedFigure : Figure = _
+  var selectedFigure:Option[Figure] = None
 
   def placedFigure(): Unit = {
-    this.remainingFigures(this.selectedFigure.strength) -= 1
+    if (selectedFigure.isDefined) {
+      this.remainingFigures(this.selectedFigure.get.strength) -= 1
 
-    if (this.remainingFigures(this.selectedFigure.strength) == 0) {
-      this.selectedFigure = null
+      if (this.remainingFigures(this.selectedFigure.get.strength) == 0) {
+        this.selectedFigure = None
+      }
     }
   }
 
   def hasUnplacedFigures:Boolean = {
-    for ((_,v) <- this.remainingFigures){
-      if (v != 0) return true
+    var hasUnplacedFigures = false
+    for ((_,v) <- this.remainingFigures) {
+      if (v != 0) hasUnplacedFigures = true
     }
-    false
+    hasUnplacedFigures
   }
 }
 
