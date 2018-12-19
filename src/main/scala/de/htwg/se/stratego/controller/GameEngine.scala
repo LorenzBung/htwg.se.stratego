@@ -80,22 +80,22 @@ class GameEngine extends Subject[GameEngine] {
 
     if (gb.get(from).figure.strength == Figure.SCOUT) {
       if (from.x < to.x) {
-        for (between <- from.x + 1 until to.x ){
+        for (between <- from.x + 1 to to.x ){
           val f = gb.get(Coordinates(between, to.y))
           if (!f.isEmpty || f.isLocked) return false
         }
       } else if (from.x > to.x) {
-        for (between <- to.x + 1 until from.x){
+        for (between <- to.x until from.x){
           val f = gb.get(Coordinates(between, to.y))
           if (!f.isEmpty || f.isLocked) return false
         }
       } else if (from.y < to.y) {
-        for (between <- from.y + 1 until to.y){
+        for (between <- from.y + 1 to to.y){
           val f = gb.get(Coordinates(to.x, between))
           if (!f.isEmpty || f.isLocked) return false
         }
       } else if (from.y > to.y) {
-        for (between <- to.y + 1 until from.y){
+        for (between <- to.y until from.y){
           val f = gb.get(Coordinates(to.x, between))
           if (!f.isEmpty || f.isLocked) return false
         }
