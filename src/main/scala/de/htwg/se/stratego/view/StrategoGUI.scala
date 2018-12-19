@@ -48,13 +48,17 @@ object StrategoGUI extends JFXApp with Observer[GameEngine] {
       fill = LightGray
       content = new VBox {
         alignment = Pos.Center
+        //scaleX = 0.5
+        //scaleY = 0.5
+        //translateX = 0.5
+        //translateY = 0.5
         children = Seq(new BorderPane {
           left = playerNameLabel
           center = new HBox {
             alignment = Pos.Center
             children = Seq(new Button ("Load Game") {
               onMouseClicked = (_: MouseEvent) => {
-                GameEngine.engine.gb = new FileIO().load.get;
+                GameEngine.engine.gb = new FileIO().load.get
                 gameBoardView.loadBoard()
                 figureSelectionView.updateFigures()
               }

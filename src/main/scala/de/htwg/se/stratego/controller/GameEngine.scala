@@ -75,8 +75,11 @@ class GameEngine extends Subject[GameEngine] {
   }
 
   def canMove(from: Coordinates, to: Coordinates): Boolean = {
+    var canMove = true
     // Can't move diagonally
-    if (from.x != to.x && from.y != to.y) return false
+    if (from.x != to.x && from.y != to.y) {
+      canMove = !canMove
+    }
 
     if (gb.get(from).figure.strength == Figure.SCOUT) {
       if (from.x < to.x) {

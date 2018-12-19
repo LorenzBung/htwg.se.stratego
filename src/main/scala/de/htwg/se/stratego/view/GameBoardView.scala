@@ -21,7 +21,7 @@ class GameBoardView(engine:GameEngine) extends GridPane {
   var from:Coordinates = _
 
   def loadBoard(): Unit ={
-
+    this.children.removeAll()
     for (i <- 1 until 11) {
       for (j <- 1 until 11) {
         this.add(new BorderPane {
