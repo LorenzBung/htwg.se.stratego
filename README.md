@@ -1,7 +1,7 @@
 Stratego - Scala - Software Engineering
 =========================
 
-[![Build Status](https://travis-ci.org/lorenzbung/htwg.se.stratego.svg?branch=develop)](https://travis-ci.org/lorenzbung/htwg.se.stratego) [![Coverage Status](https://coveralls.io/repos/github/lorenzbung/htwg.se.stratego/badge.svg?branch=develop&service=github)](https://coveralls.io/github/lorenzbung/htwg.se.stratego?branch=develop)
+[![Build Status](https://travis-ci.org/LorenzBung/htwg.se.stratego.svg?branch=develop)](https://travis-ci.org/LorenzBung/htwg.se.stratego) [![Coverage Status](https://coveralls.io/repos/github/LorenzBung/htwg.se.stratego/badge.svg?branch=develop&service=github)](https://coveralls.io/github/LorenzBung/htwg.se.stratego?branch=develop)
 
 This is a seed project to create a basic scala project as used in the
 class Software Engineering at the University of Applied Science HTWG Konstanz
