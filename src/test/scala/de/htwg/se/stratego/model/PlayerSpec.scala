@@ -35,7 +35,7 @@ class PlayerSpec extends WordSpec with Matchers {
     val p = new Player("Test Player")
     "select the correct one" in {
       p.selectedFigure = Some(Figure.withStrength(p, 3))
-      p.selectedFigure should be(Figure.withStrength(p, 3))
+      p.selectedFigure should be(Some(Figure.withStrength(p, 3)))
     }
   }}
 

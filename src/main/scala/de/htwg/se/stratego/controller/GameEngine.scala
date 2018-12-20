@@ -26,7 +26,7 @@ class GameEngine extends Subject[GameEngine] {
 
     val attacker: Figure = gb.get(from).figure
 
-    if (!canMove(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) return false
+    if (!canMoveImproved(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) return false
 
     if (gb.get(to).isEmpty) {
       gb.move(from, to)
@@ -108,6 +108,46 @@ class GameEngine extends Subject[GameEngine] {
     }
 
     true
+  }
+
+  def canMoveImproved(from: Coordinates, to: Coordinates): Boolean = {
+    val fig = gb.get(from).figure
+    if (fig.strength == Figure.SCOUT) {
+      canMoveScout(from, to)
+    } else if (fig.strength == Figure.FLAG || fig.strength == Figure.BOMB) {
+      false
+    } else {
+      canMoveDefaultFigure(from, to)
+    }
+  }
+
+  private def canMoveDefaultFigure(from: Coordinates, to: Coordinates): Boolean = {
+    val differenceX = Math.abs(from.x - to.x)
+    val differenceY = Math.abs(from.y - to.y)
+    differenceX + differenceY == 1 && !gb.get(to).isLocked
+  }
+
+  private def canMoveScout(from: Coordinates, to: Coordinates): Boolean = {
+    !gb.get(to).isLocked && !movesDiagonally(from, to)
+  }
+
+  private def movesDiagonally(from: Coordinates, to: Coordinates): Boolean = {
+    from.x != to.x && from.y != to.y
+  }
+
+  private def isFigureInBetween(from: Coordinates, to: Coordinates): Boolean = {
+    var figureAmount = 0
+    for (i <- from.x to to.x) {
+      if (!gb.get(Coordinates(i, from.y)).isEmpty) {
+        figureAmount += 1
+      }
+    }
+    for (i <- from.y until to.y) {
+      if (!gb.get(Coordinates(from.x, i)).isEmpty) {
+        figureAmount += 1
+      }
+    }
+    figureAmount < 2
   }
 
   def switchPlayers(): Unit = {
