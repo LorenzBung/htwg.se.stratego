@@ -60,7 +60,7 @@ class GameBoardView(engine:GameEngine) extends GridPane {
                 background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
               }
             } else {
-              if (from != null && engine.canMove(from, Coordinates(i,j))) {
+              if (from != null && engine.canMoveImproved(from, Coordinates(i,j))) {
                 var hoverColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
                 background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
               }

@@ -12,7 +12,13 @@ class FileIO extends FileIOInterface {
     val file = XML.loadFile("grid.xml")
     //val injector = Guice.createInjector(new SudokuModule)
 
+    val currentPlayer = file \\ "currentPlayer"
+
     val playerOne = file \\ "playerOne" \ "remaining" \ "figure"
+    val playerOneSelected = (file \\ "playerOne" \ "@selected").text.toInt
+    if(playerOneSelected != -1){
+      grid.playerOne.selectedFigure = Some(Figure.withStrength(grid.playerOne, playerOneSelected))
+    }
     for (fig <- playerOne) {
       val strength: Int = (fig \ "@strength").text.toInt
       val count: Int = fig.text.trim.toInt
@@ -20,11 +26,17 @@ class FileIO extends FileIOInterface {
     }
 
     val playerTwo = file \\ "playerTwo" \ "remaining" \ "figure"
-    for (fig <- playerOne) {
+    val playerTwoSelected = (file \\ "playerTwo" \ "@selected").text.toInt
+    if(playerTwoSelected != -1){
+      grid.playerTwo.selectedFigure = Some(Figure.withStrength(grid.playerTwo, playerTwoSelected))
+    }
+    for (fig <- playerTwo) {
       val strength: Int = (fig \ "@strength").text.toInt
       val count: Int = fig.text.trim.toInt
       grid.playerTwo.remainingFigures.put(strength, count)
     }
+
+    grid.currentPlayer = if (currentPlayer.text.toBoolean) grid.playerOne else grid.playerTwo
 
     val cellNodes= file \\ "cell"
     for (cell <- cellNodes) {
@@ -43,14 +55,18 @@ class FileIO extends FileIOInterface {
   }
 
   def gridToXml(grid:GameBoardInterface):Elem = {
-    var selected:Int = -1
+    var selectedOne:Int = -1
+    var selectedTwo:Int = -1
     if (grid.playerOne.selectedFigure.isDefined) {
-      selected = grid.playerOne.selectedFigure.get.strength
+      selectedOne = grid.playerOne.selectedFigure.get.strength
+    }
+    if (grid.playerTwo.selectedFigure.isDefined) {
+      selectedTwo = grid.playerTwo.selectedFigure.get.strength
     }
 
     <grid>
       <currentPlayer>{(grid.playerOne == grid.currentPlayer).toString}</currentPlayer>
-      <playerOne name={grid.playerOne.name.toString} selected={selected.toString}>
+      <playerOne name={grid.playerOne.name.toString} selected={selectedOne.toString}>
         <remaining>
         {
         for {
@@ -59,7 +75,7 @@ class FileIO extends FileIOInterface {
         }
         </remaining>
       </playerOne>
-      <playerTwo name={grid.playerTwo.name.toString}>
+      <playerTwo name={grid.playerTwo.name.toString} selected={selectedTwo.toString}>
         <remaining>
         {
         for {

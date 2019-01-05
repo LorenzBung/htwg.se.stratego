@@ -59,8 +59,7 @@ object StrategoGUI extends JFXApp with Observer[GameEngine] {
             children = Seq(new Button ("Load Game") {
               onMouseClicked = (_: MouseEvent) => {
                 GameEngine.engine.gb = new FileIO().load.get
-                gameBoardView.loadBoard()
-                figureSelectionView.updateFigures()
+                receiveUpdate(GameEngine.engine)
               }
             },new Button ("Save Game") {
               onMouseClicked = (_: MouseEvent) => { new FileIO().saveXML(engine.gb) }
