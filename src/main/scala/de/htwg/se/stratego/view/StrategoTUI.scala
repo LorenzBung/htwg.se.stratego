@@ -9,7 +9,6 @@ import scala.io.StdIn
 
 class StrategoTUI extends Observer[GameEngine] {
   var engine: GameEngine = GameEngine.engine
-  var board: GameBoardInterface = GameEngine.engine.gb
 
   def start() {
     println()
@@ -37,60 +36,11 @@ class StrategoTUI extends Observer[GameEngine] {
 
     engine.addObserver(this)
 
-    playerPreparation(engine.gb.playerOne)
-    playerPreparation(engine.gb.playerTwo)
-
     mainLoop()
   }
 
-  def playerPreparation(player:Player): Unit = {
-    println("Hey " + player.name + "! Select a figure and place it somewhere " +
-      "with \"select <STRENGTH>\" and \"set <X> <Y>\".")
-
-    printPrompt(player)
-
-    while (player.hasUnplacedFigures) {
-      var line : String = ""
-      if (!{line = StdIn.readLine(); line}.isEmpty) {
-        val params = line.split(" ")
-        params match {
-          case Array("set", x, y) if x.forall(_.isDigit) && y.forall(_.isDigit) =>
-            if (player.selectedFigure.isDefined) {
-              if (engine.set(Coordinates(x.toInt, y.toInt))){
-                print("Placed")
-              } else {
-                println(Console.RED + "Couldn't place " + player.selectedFigure.get.description + Console.RESET)
-              }
-            } else {
-              println("No Figure selected")
-            }
-
-          case Array("select", fig) if fig.forall(_.isDigit) =>
-            val strength = fig.toInt
-            if (engine.selectFigure(player, strength)) {
-              print("Selected")
-            }else{
-              println("You don't have any Figures of this strength")
-              printPrompt(player)
-            }
-          case Array("show", _*) =>
-            println(board)
-            printPrompt(player)
-          case Array("exit", _*) =>
-            println(Console.RED + player.name + " surrendered" + Console.RESET)
-            engine.exit()
-          case _ =>
-            println("Available Commands:")
-            println("show, select <STRENGTH>, set <X> <Y>, exit")
-            printPrompt(player)
-        }
-
-      }
-    }
-  }
-
   def printPrompt(player: Player): Unit ={
-    var playerColor = if (board.currentPlayer == engine.gb.playerOne) Console.RED else Console.BLUE
+    var playerColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Console.RED else Console.BLUE
     if (player.selectedFigure.isDefined){
       print(playerColor + player.name + Console.RESET + " " + player.selectedFigure.get.description + " (" + player.remainingFigures(player.selectedFigure.get.strength) +" left)> " + Console.RESET)
     } else {
@@ -98,14 +48,36 @@ class StrategoTUI extends Observer[GameEngine] {
     }
   }
 
-  def mainLoop(): Unit ={
+  def mainLoop(): Unit = {
+    printPrompt(engine.gb.currentPlayer)
     var line : String = ""
     while (!{line = StdIn.readLine(); line}.isEmpty) {
       val params = line.split(" ")
 
       params match {
+        case Array("set", x, y) if x.forall(_.isDigit) && y.forall(_.isDigit) =>
+          if (engine.gb.currentPlayer.selectedFigure.isDefined) {
+            if (engine.set(Coordinates(x.toInt, y.toInt))){
+              print("Placed")
+            } else {
+              println(Console.RED + "Couldn't place " + engine.gb.currentPlayer.selectedFigure.get.description + Console.RESET)
+              printPrompt(engine.gb.currentPlayer)
+            }
+          } else {
+            println("No Figure selected")
+            printPrompt(engine.gb.currentPlayer)
+          }
+
+        case Array("select", fig) if fig.forall(_.isDigit) =>
+          val strength = fig.toInt
+          if (engine.selectFigure(engine.gb.currentPlayer, strength)) {
+            print("Selected")
+          }else{
+            println("You don't have any Figures of this strength")
+            printPrompt(engine.gb.currentPlayer)
+          }
         case Array("show", _*) =>
-          println(board)
+          println(engine.gb)
 
           case Array("move", a, b, c, d) =>
             val x1 = a.toInt
@@ -119,9 +91,9 @@ class StrategoTUI extends Observer[GameEngine] {
 
         case _ =>
           println("Available Commands:")
-          println("show, move <X1> <Y1> <X2> <Y2>, exit")
+          println("show, select <STRENGTH>, set <X> <Y>, move <X1> <Y1> <X2> <Y2>, exit")
+          printPrompt(engine.gb.currentPlayer)
       }
-      printPrompt(board.currentPlayer)
     }
   }
 
