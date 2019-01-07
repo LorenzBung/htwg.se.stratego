@@ -8,6 +8,7 @@ import scalafx.scene.image.ImageView
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{Background, BackgroundFill, BorderPane, GridPane}
 import scalafx.scene.paint.Color
+import scalafx.stage.Screen
 
 class GameBoardView(engine:GameEngine) extends GridPane {
 
@@ -16,6 +17,8 @@ class GameBoardView(engine:GameEngine) extends GridPane {
   vgap = 1
   minHeight = 811
   maxWidth = 811
+  scaleX()
+  print(Screen.primary.visualBounds.height)
   margin = Insets(10,0,0,0)
 
   var from:Coordinates = _
