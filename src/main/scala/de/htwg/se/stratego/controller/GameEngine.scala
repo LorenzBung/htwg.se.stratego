@@ -27,7 +27,7 @@ class GameEngine extends Subject[GameEngine] {
 
     val attacker: Figure = gb.get(from).figure
 
-    if (!canMoveImproved(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) return false
+    if (!canMove(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) return false
 
     if (gb.get(to).isEmpty) {
       gb.move(from, to)
@@ -40,82 +40,59 @@ class GameEngine extends Subject[GameEngine] {
     // Attacker must be the current player, cannot beat own figures
     if (defender.player == gb.currentPlayer) return false
 
+    var attackerWins = false
+    var defenderWins = false
 
-    //Field is empty OR has figure of other player on it
     if (attacker.strength == Figure.MINER && defender.strength == Figure.BOMB) {
       // Miner defuses Bomb
-      gb.move(from, to)
+      attackerWins = true
     } else if (attacker.strength == Figure.SPY && defender.strength == Figure.MARSHAL) {
       // Spy kills Marshal
-      gb.move(from, to)
+      attackerWins = true
     } else if (defender.strength == Figure.FLAG) {
       // Attacker wins game
-      gb.move(from, to)
+      attackerWins = true
       println()
       println(attacker.player.name + " wins")
       new Alert(AlertType.Information, attacker.player.name + " wins").showAndWait()
       exit()
     } else if (attacker.strength > defender.strength) {
       // Attacker wins
-      gb.move(from, to)
+      attackerWins = true
     } else if (defender.strength > attacker.strength){
       // Defender wins
-      gb.set(from, None)
+      defenderWins = true
     } else if (defender.strength == attacker.strength) {
       // Figures have same strength
+    }
+
+    if(attackerWins){
+      gb.move(from, to)
+    } else if (defenderWins) {
+      gb.move(to, from)
+    } else {
       gb.set(from, None)
       gb.set(to, None)
     }
 
+
     Platform.runLater {
       StrategoGUI.stage.hide()
-      new AlertView(attacker, defender).showAndWait()
+      new AlertView(attacker, !attackerWins, defender, !defenderWins).showAndWait()
       switchPlayers()
     }
     true
   }
 
   def canMove(from: Coordinates, to: Coordinates): Boolean = {
-    var canMove = true
-    // Can't move diagonally
-    if (from.x != to.x && from.y != to.y) {
-      canMove = !canMove
-    }
-
-    if (gb.get(from).figure.strength == Figure.SCOUT) {
-      if (from.x < to.x) {
-        for (between <- from.x + 1 to to.x ){
-          val f = gb.get(Coordinates(between, to.y))
-          if (!f.isEmpty || f.isLocked) return false
-        }
-      } else if (from.x > to.x) {
-        for (between <- to.x until from.x){
-          val f = gb.get(Coordinates(between, to.y))
-          if (!f.isEmpty || f.isLocked) return false
-        }
-      } else if (from.y < to.y) {
-        for (between <- from.y + 1 to to.y){
-          val f = gb.get(Coordinates(to.x, between))
-          if (!f.isEmpty || f.isLocked) return false
-        }
-      } else if (from.y > to.y) {
-        for (between <- to.y until from.y){
-          val f = gb.get(Coordinates(to.x, between))
-          if (!f.isEmpty || f.isLocked) return false
-        }
-      }
-    } else if ((from.x > to.x + 1 || from.x < to.x - 1) || (from.y > to.y + 1 || from.y < to.y - 1)) {
-      return false
-    }
-
-    true
-  }
-
-  def canMoveImproved(from: Coordinates, to: Coordinates): Boolean = {
-    val fig = gb.get(from).figure
-    if (fig.strength == Figure.SCOUT) {
+    val fig = gb.get(from).fig
+    if(fig.isEmpty){
+      false
+    } else if(gb.get(to).fig.isDefined && gb.get(from).fig.get.player == gb.get(to).fig.get.player){
+      false
+    }else if (fig.get.strength == Figure.SCOUT) {
       canMoveScout(from, to)
-    } else if (fig.strength == Figure.FLAG || fig.strength == Figure.BOMB) {
+    } else if (!fig.get.isMovable) {
       false
     } else {
       canMoveDefaultFigure(from, to)
@@ -129,7 +106,7 @@ class GameEngine extends Subject[GameEngine] {
   }
 
   private def canMoveScout(from: Coordinates, to: Coordinates): Boolean = {
-    !gb.get(to).isLocked && !movesDiagonally(from, to)
+    !gb.get(to).isLocked && !movesDiagonally(from, to) && !isFigureInBetween(from, to)
   }
 
   private def movesDiagonally(from: Coordinates, to: Coordinates): Boolean = {
@@ -138,17 +115,19 @@ class GameEngine extends Subject[GameEngine] {
 
   private def isFigureInBetween(from: Coordinates, to: Coordinates): Boolean = {
     var figureAmount = 0
-    for (i <- from.x to to.x) {
-      if (!gb.get(Coordinates(i, from.y)).isEmpty) {
+    val xstep = if(from.x < to.x) 1 else -1
+    for (i <- from.x + xstep until to.x by xstep) {
+      if (!gb.get(Coordinates(i, from.y)).isEmpty || gb.get(Coordinates(i, from.y)).isLocked) {
         figureAmount += 1
       }
     }
-    for (i <- from.y until to.y) {
-      if (!gb.get(Coordinates(from.x, i)).isEmpty) {
+    val ystep = if(from.y < to.y) 1 else -1
+    for (i <- from.y + ystep until to.y by ystep) {
+      if (!gb.get(Coordinates(from.x, i)).isEmpty || gb.get(Coordinates(from.x, i)).isLocked) {
         figureAmount += 1
       }
     }
-    figureAmount < 2
+    figureAmount > 0
   }
 
   def switchPlayers(): Unit = {
@@ -170,8 +149,8 @@ class GameEngine extends Subject[GameEngine] {
   def unset(coord:Coordinates): Boolean = {
     val field = gb.get(coord)
     if(!field.isEmpty && !field.isLocked) {
-      gb.set(coord, None)
       gb.currentPlayer.remainingFigures(field.figure.strength) += 1
+      gb.set(coord, None)
       notifyObservers()
       true
     }
