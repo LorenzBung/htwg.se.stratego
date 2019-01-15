@@ -53,6 +53,7 @@ class GameEngineSpec extends WordSpec with Matchers {
       }
     }
     "asked about movement" should {
+      engine.gb.currentPlayer = engine.gb.playerTwo
       engine.selectFigure(engine.gb.playerTwo, 3)
       engine.set(Coordinates(1, 1))
       "return the correct value for diagonal movement" in {
@@ -64,11 +65,41 @@ class GameEngineSpec extends WordSpec with Matchers {
       "return the correct values for default movement" in {
         engine.canMoveDefaultFigure(Coordinates(1, 1), Coordinates(1, 2)) should be(true)
       }
-      "return the correct value if a figure is in between" in {
+      "return the correct value if a figure is in between moving vertically and it isn't" in {
         engine.isFigureInBetween(Coordinates(1, 1), Coordinates(1, 3)) should be(false)
       }
+      "return the correct value if a figure is in between moving vertically" in {
+        engine.set(Coordinates(1, 2))
+        engine.isFigureInBetween(Coordinates(1, 1), Coordinates(1, 3)) should be(true)
+      }
+      "return the correct value if a figure is in between moving horizontally and it isn't" in {
+        engine.isFigureInBetween(Coordinates(1, 1), Coordinates(3, 1)) should be(false)
+      }
+      "return the correct value if a figure is in between moving horizontally" in {
+        engine.set(Coordinates(2, 1))
+        engine.isFigureInBetween(Coordinates(1, 1), Coordinates(3, 1)) should be(true)
+      }
       "return the correct value if a figure can move" in {
-        engine.canMove(Coordinates(1, 1), Coordinates(1, 2)) should be(false)
+        engine.unset(Coordinates(1, 2))
+        engine.canMove(Coordinates(1, 1), Coordinates(1, 2)) should be(true)
+      }
+      "return the correct value if a figure can move and it is undefined" in {
+        engine.canMove(Coordinates(5, 5), Coordinates(3, 3)) should be(false)
+      }
+      "return the correct value if a figure can move to an existing own figure" in {
+        engine.set(Coordinates(2, 1))
+        engine.canMove(Coordinates(1, 1), Coordinates(2, 1)) should be(false)
+      }
+      "return the correct value if a figure can move and it is a scout" in {
+        engine.selectFigure(engine.gb.playerTwo, 2)
+        engine.set(Coordinates(2, 2))
+        engine.canMove(Coordinates(2, 2), Coordinates(2, 3)) should be(true)
+      }
+      "return the correct value if a figure can move and it cannot move" in {
+        engine.selectFigure(engine.gb.playerTwo, 0)
+        engine.unset(Coordinates(2, 1))
+        engine.set(Coordinates(2, 1))
+        engine.canMove(Coordinates(2, 1), Coordinates(2, 2)) should be(false)
       }
     }
   }
