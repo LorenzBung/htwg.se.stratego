@@ -8,7 +8,7 @@ import scala.xml.{Elem, XML}
 class FileIO extends FileIOInterface {
 
   override def load: Option[GameBoardInterface] = {
-    var grid: GameBoardInterface = new GameBoard()
+    val grid: GameBoardInterface = new GameBoard()
     val file = XML.loadFile("grid.xml")
     //val injector = Guice.createInjector(new SudokuModule)
 

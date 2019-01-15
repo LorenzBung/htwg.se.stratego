@@ -13,7 +13,7 @@ import scala.io.Source
 class FileIO extends FileIOInterface {
 
   override def load: Option[GameBoardInterface] = {
-    var grid: GameBoardInterface = new GameBoard()
+    val grid: GameBoardInterface = new GameBoard()
     val source: String = Source.fromFile("grid.json").getLines.mkString
     val file: JsValue = Json.parse(source)
     //val injector = Guice.createInjector(new SudokuModule)
@@ -59,13 +59,13 @@ class FileIO extends FileIOInterface {
     import java.io._
     val pw = new PrintWriter(new File("grid.json"))
     pw.write(Json.prettyPrint(gridToJson(grid)))
-    pw.close
+    pw.close()
   }
 
   def gridToJson(grid: GameBoardInterface): JsObject = {
 
-    var selectedOne:Int = -1
-    var selectedTwo:Int = -1
+    var selectedOne: Int = -1
+    var selectedTwo: Int = -1
     if (grid.playerOne.selectedFigure.isDefined) {
       selectedOne = grid.playerOne.selectedFigure.get.strength
     }
