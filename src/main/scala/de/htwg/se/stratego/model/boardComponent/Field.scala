@@ -26,17 +26,13 @@ class Field {
     fig = newFig
   }
 
-  def figure: Figure = {
-    fig.get
-  }
-
   override def toString: String = {
     if (isLocked) {
       "X"
     } else if (isEmpty) {
       " "
     } else {
-      figure.toString
+      fig.getOrElse("Err").toString
     }
 
   }

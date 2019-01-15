@@ -3,9 +3,9 @@ package de.htwg.se.stratego.model.fileIoComponent.fileIoJsonImpl
 import com.google.inject.Guice
 import com.google.inject.name.Names
 import de.htwg.se.stratego.model.boardComponent.{Coordinates, Figure, GameBoard}
-import de.htwg.se.sudoku.model.fileIoComponent.FileIOInterface
 import net.codingwell.scalaguice.InjectorExtensions._
 import de.htwg.se.stratego.model.boardComponent.GameBoardInterface
+import de.htwg.se.stratego.model.fileIoComponent.FileIOInterface
 import play.api.libs.json._
 
 import scala.io.Source
@@ -16,7 +16,7 @@ class FileIO extends FileIOInterface {
     val grid: GameBoardInterface = new GameBoard()
     val source: String = Source.fromFile("grid.json").getLines.mkString
     val file: JsValue = Json.parse(source)
-    //val injector = Guice.createInjector(new SudokuModule)
+    val injector = Guice.createInjector()
     val currentPlayer = file \ "currentPlayer"
 
     val playerOne = file \ "playerOne" \ "remaining" \\ "figure"
@@ -95,8 +95,8 @@ class FileIO extends FileIOInterface {
       ),
       "cells" -> JsArray(
         for {
-          row <- 1 to GameBoard.BOARDSIZE
-          col <- 1 to GameBoard.BOARDSIZE
+          row <- 1 to grid.size
+          col <- 1 to grid.size
         } yield cellToJson(grid, Coordinates(row,col))
       ),
     )

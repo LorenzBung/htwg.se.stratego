@@ -1,7 +1,7 @@
 package de.htwg.se.stratego.model.fileIoComponent.fileIoXmlImpl
 
 import de.htwg.se.stratego.model.boardComponent.{Coordinates, Figure, GameBoard, GameBoardInterface}
-import de.htwg.se.sudoku.model.fileIoComponent.FileIOInterface
+import de.htwg.se.stratego.model.fileIoComponent.FileIOInterface
 
 import scala.xml.{Elem, XML}
 
@@ -86,8 +86,8 @@ class FileIO extends FileIOInterface {
       </playerTwo>
       {
       for {
-        row <- 1 to GameBoard.BOARDSIZE
-        col <- 1 to GameBoard.BOARDSIZE
+        row <- 1 to grid.size
+        col <- 1 to grid.size
       } yield cellToXml(grid, Coordinates(row,col))
       }
     </grid>

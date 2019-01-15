@@ -52,11 +52,11 @@ object StrategoGUI extends JFXApp with Observer[GameEngine] {
           center = new HBox {
             alignment = Pos.Center
             children = Seq(new Button ("Load Game") {
-              onMouseClicked = (_e: MouseEvent) => { engine.loadGame() }
+              onMouseClicked = (_: MouseEvent) => { engine.loadGame() }
             },new Button("Save Game") {
-              onMouseClicked = (_e: MouseEvent) => { engine.saveGame() }
+              onMouseClicked = (_: MouseEvent) => { engine.saveGame() }
             }, new Button("New Game") {
-              onMouseClicked = (_e: MouseEvent) => { engine.newGame() }
+              onMouseClicked = (_: MouseEvent) => { engine.newGame() }
             })
           }
           right = figureNameLabel
