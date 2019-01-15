@@ -16,7 +16,6 @@ class FileIO extends FileIOInterface {
     var grid: GameBoardInterface = new GameBoard()
     val source: String = Source.fromFile("grid.json").getLines.mkString
     val file: JsValue = Json.parse(source)
-    val size = (file \ "grid" \ "size").get.toString.toInt
     //val injector = Guice.createInjector(new SudokuModule)
     val currentPlayer = file \ "currentPlayer"
 
@@ -106,7 +105,7 @@ class FileIO extends FileIOInterface {
   def cellToJson(grid:GameBoardInterface, coordinates: Coordinates):JsObject = {
     if (grid.get(coordinates).fig.isDefined) {
       val isFirst:Boolean = grid.get(coordinates).fig.get.player == grid.playerOne
-      Json.obj(
+      return Json.obj(
         "cell" -> Json.obj(
           "row" -> JsNumber(coordinates.x),
           "col" -> JsNumber(coordinates.y),

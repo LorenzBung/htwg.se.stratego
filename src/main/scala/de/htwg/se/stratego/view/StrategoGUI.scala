@@ -2,6 +2,7 @@ package de.htwg.se.stratego.view
 
 import de.htwg.se.stratego.controller.GameEngine
 import de.htwg.se.stratego.model._
+import scalafx.Includes._
 import scalafx.application.{JFXApp, Platform}
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
