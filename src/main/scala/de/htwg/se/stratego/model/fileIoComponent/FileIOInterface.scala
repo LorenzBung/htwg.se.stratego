@@ -1,4 +1,4 @@
-package de.htwg.se.sudoku.model.fileIoComponent
+package de.htwg.se.stratego.model.fileIoComponent
 
 import de.htwg.se.stratego.model.boardComponent.GameBoardInterface
 

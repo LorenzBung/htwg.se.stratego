@@ -17,8 +17,6 @@ class GameBoardView(engine:GameEngine) extends GridPane {
   vgap = 1
   minHeight = 811
   maxWidth = 811
-  scaleX()
-  print(Screen.primary.visualBounds.height)
   margin = Insets(10,0,0,0)
 
   var from:Coordinates = _
@@ -41,13 +39,13 @@ class GameBoardView(engine:GameEngine) extends GridPane {
             if(!field.isEmpty) {
               center = new BorderPane {
 
-                center = new ImageView(if (field.figure.player == engine.gb.currentPlayer) field.figure.strength + ".png" else "stratego.png") {
+                center = new ImageView(if (field.fig.get.player == engine.gb.currentPlayer) field.fig.get.strength + ".png" else "stratego.png") {
                   fitWidth = 42
                   preserveRatio = true
                   smooth = true
                 }
                 maxWidth = 50
-                if (field.figure.player == engine.gb.playerOne) {
+                if (field.fig.get.player == engine.gb.playerOne) {
                   style = "-fx-background-radius: 8px; -fx-background-color:red;"
                 } else {
                   style = "-fx-background-radius: 8px; -fx-background-color:blue;"
@@ -57,7 +55,7 @@ class GameBoardView(engine:GameEngine) extends GridPane {
           }
 
           onMouseEntered = (_event: MouseEvent) => {
-            if (engine.gb.currentPlayer.hasUnplacedFigures){
+            if (engine.gb.currentPlayer.hasUnplacedFigures && engine.gb.currentPlayer.selectedFigure.isDefined){
               if (engine.canSet(Coordinates(i,j))) {
                 var hoverColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
                 background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
@@ -66,6 +64,8 @@ class GameBoardView(engine:GameEngine) extends GridPane {
               if (from != null && engine.canMove(from, Coordinates(i,j))) {
                 var hoverColor = if (engine.gb.currentPlayer == engine.gb.playerOne) Color.Red else Color.Blue
                 background = new Background(Array(new BackgroundFill(hoverColor, null, null)))
+              } else if(from == null && engine.get(Coordinates(i,j)).fig.isDefined && engine.get(Coordinates(i,j)).fig.get.isMovable && engine.get(Coordinates(i,j)).fig.get.player == engine.gb.currentPlayer) {
+                background = new Background(Array(new BackgroundFill(Color.Gold, null, null)))
               }
             }
           }

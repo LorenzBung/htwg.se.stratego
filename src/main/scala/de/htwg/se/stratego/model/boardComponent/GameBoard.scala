@@ -6,13 +6,14 @@ class GameBoard(fields: Array[Array[Field]]) extends GameBoardInterface {
   var playerOne = Player("Player 1")
   var playerTwo = Player("Player 2")
   var currentPlayer:Player = playerOne
+  final val size = 10
 
   def set(coords: Coordinates, figure: Option[Figure]): Unit = {
     fields(coords.y - 1)(coords.x - 1).setFigure(figure)
   }
 
   def this() {
-    this(Array.tabulate(GameBoard.BOARDSIZE, GameBoard.BOARDSIZE)((x,y) => {
+    this(Array.tabulate(10, 10)((x,y) => {
       val field = new Field()
 
       if (x == 4 || x == 5) y match {
@@ -29,7 +30,7 @@ class GameBoard(fields: Array[Array[Field]]) extends GameBoardInterface {
   }
 
   def move(from: Coordinates, to: Coordinates): Unit = {
-    set(to, Some(get(from).figure))
+    set(to, get(from).fig)
     set(from, None)
   }
 
@@ -59,8 +60,4 @@ class GameBoard(fields: Array[Array[Field]]) extends GameBoardInterface {
 
     board
   }
-}
-
-object GameBoard {
-  val BOARDSIZE = 10
 }

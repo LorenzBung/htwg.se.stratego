@@ -1,15 +1,19 @@
 package de.htwg.se.stratego.controller
 
+import com.google.inject.Guice
+import de.htwg.se.stratego.StrategoModule
 import de.htwg.se.stratego.model._
-import de.htwg.se.stratego.model.boardComponent._
-import de.htwg.se.stratego.model.fileIoComponent.fileIoJsonImpl.FileIO
+import net.codingwell.scalaguice.InjectorExtensions._
+import de.htwg.se.stratego.model.boardComponent.{Coordinates, Field, Figure, GameBoardInterface}
+import de.htwg.se.stratego.model.fileIoComponent.FileIOInterface
 import de.htwg.se.stratego.view.{AlertView, StrategoGUI, StrategoTUI}
 import scalafx.application.Platform
 import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
 
 class GameEngine extends Subject[GameEngine] {
-  var gb: GameBoardInterface = new GameBoard()
+  val injector = Guice.createInjector(new StrategoModule)
+  var gb: GameBoardInterface = injector.instance[GameBoardInterface]
 
   def exit(): Unit = {
     System.exit(0)
@@ -25,7 +29,7 @@ class GameEngine extends Subject[GameEngine] {
     // No figure on field "from" OR field locked
     if (gb.get(from).isEmpty || gb.get(to).isLocked) return false
 
-    val attacker: Figure = gb.get(from).figure
+    val attacker = gb.get(from).fig.get
 
     if (!canMove(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) return false
 
@@ -35,7 +39,7 @@ class GameEngine extends Subject[GameEngine] {
       return true
     }
 
-    val defender: Figure = gb.get(to).figure
+    val defender = gb.get(to).fig.get
 
     // Attacker must be the current player, cannot beat own figures
     if (defender.player == gb.currentPlayer) return false
@@ -149,7 +153,7 @@ class GameEngine extends Subject[GameEngine] {
   def unset(coord:Coordinates): Boolean = {
     val field = gb.get(coord)
     if(!field.isEmpty && !field.isLocked) {
-      gb.currentPlayer.remainingFigures(field.figure.strength) += 1
+      gb.currentPlayer.remainingFigures(field.fig.get.strength) += 1
       gb.set(coord, None)
       notifyObservers()
       true
@@ -175,7 +179,7 @@ class GameEngine extends Subject[GameEngine] {
   }
 
   def canSet(coord:Coordinates): Boolean = {
-    if (coord.x > GameBoard.BOARDSIZE || coord.x < 1 || coord.y > GameBoard.BOARDSIZE || coord.y < 1) {
+    if (coord.x > gb.size || coord.x < 1 || coord.y > gb.size || coord.y < 1) {
       return false
     }
 
@@ -209,17 +213,17 @@ class GameEngine extends Subject[GameEngine] {
   }
 
   def newGame(): Unit = {
-    gb = new GameBoard()
+    gb = injector.instance[GameBoardInterface]
     notifyObservers()
   }
 
   def loadGame(): Unit = {
-    gb = new FileIO().load.get
+    gb = injector.instance[FileIOInterface].load.get
     notifyObservers()
   }
 
   def saveGame(): Unit = {
-    new FileIO().save(gb)
+    injector.instance[FileIOInterface].save(gb)
   }
 }
 

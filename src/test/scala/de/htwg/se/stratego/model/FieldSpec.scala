@@ -16,7 +16,7 @@ class FieldSpec extends WordSpec with Matchers {
       field.isLocked should be(false)
     }
     "set the right figure" in {
-      field.figure should be(fig)
+      field.fig.get should be(fig)
     }
   }}
 
