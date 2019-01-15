@@ -52,5 +52,24 @@ class GameEngineSpec extends WordSpec with Matchers {
         engine.get(Coordinates(1, 1)) should be(gb.get(Coordinates(1, 1)))
       }
     }
+    "asked about movement" should {
+      engine.selectFigure(engine.gb.playerTwo, 3)
+      engine.set(Coordinates(1, 1))
+      "return the correct value for diagonal movement" in {
+        engine.movesDiagonally(Coordinates(1, 1), Coordinates(2, 2)) should be(true)
+      }
+      "return the correct value for scout movement" in {
+        engine.canMoveScout(Coordinates(1, 1), Coordinates(1, 5)) should be(true)
+      }
+      "return the correct values for default movement" in {
+        engine.canMoveDefaultFigure(Coordinates(1, 1), Coordinates(1, 2)) should be(true)
+      }
+      "return the correct value if a figure is in between" in {
+        engine.isFigureInBetween(Coordinates(1, 1), Coordinates(1, 3)) should be(false)
+      }
+      "return the correct value if a figure can move" in {
+        engine.canMove(Coordinates(1, 1), Coordinates(1, 2)) should be(false)
+      }
+    }
   }
 }

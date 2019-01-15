@@ -99,21 +99,21 @@ class GameEngine extends Subject[GameEngine] {
     }
   }
 
-  private def canMoveDefaultFigure(from: Coordinates, to: Coordinates): Boolean = {
+  def canMoveDefaultFigure(from: Coordinates, to: Coordinates): Boolean = {
     val differenceX = Math.abs(from.x - to.x)
     val differenceY = Math.abs(from.y - to.y)
     differenceX + differenceY == 1 && !gb.get(to).isLocked
   }
 
-  private def canMoveScout(from: Coordinates, to: Coordinates): Boolean = {
+  def canMoveScout(from: Coordinates, to: Coordinates): Boolean = {
     !gb.get(to).isLocked && !movesDiagonally(from, to) && !isFigureInBetween(from, to)
   }
 
-  private def movesDiagonally(from: Coordinates, to: Coordinates): Boolean = {
+  def movesDiagonally(from: Coordinates, to: Coordinates): Boolean = {
     from.x != to.x && from.y != to.y
   }
 
-  private def isFigureInBetween(from: Coordinates, to: Coordinates): Boolean = {
+  def isFigureInBetween(from: Coordinates, to: Coordinates): Boolean = {
     var figureAmount = 0
     val xstep = if(from.x < to.x) 1 else -1
     for (i <- from.x + xstep until to.x by xstep) {

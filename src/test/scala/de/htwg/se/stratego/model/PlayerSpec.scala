@@ -50,5 +50,10 @@ class PlayerSpec extends WordSpec with Matchers {
       p.placedFigure()
       p.remainingFigures(8) should be(0)
     }
+    "should not be able to if he selected a wrong one" in {
+      p.selectedFigure = None
+      p.placedFigure()
+      p.remainingFigures(0) should be(1)
+    }
   }}
 }
