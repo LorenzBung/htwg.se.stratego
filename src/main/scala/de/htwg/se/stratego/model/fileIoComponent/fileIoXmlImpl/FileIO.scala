@@ -50,7 +50,7 @@ class FileIO extends FileIOInterface {
     Some(grid)
   }
 
-  def saveXML(grid:GameBoardInterface):Unit = {
+  def save(grid:GameBoardInterface):Unit = {
     XML.save("grid.xml", gridToXml(grid))
   }
 
@@ -106,9 +106,5 @@ class FileIO extends FileIOInterface {
       <figure strength={k.toString}>
         {v.toString}
       </figure>
-  }
-
-  override def save(grid: GameBoardInterface): Unit = {
-
   }
 }

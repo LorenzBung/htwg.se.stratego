@@ -1,79 +1,129 @@
-package de.htwg.se.sudoku.model.fileIoComponent.fileIoJsonImpl
+package de.htwg.se.stratego.model.fileIoComponent.fileIoJsonImpl
 
 import com.google.inject.Guice
 import com.google.inject.name.Names
-import net.codingwell.scalaguice.InjectorExtensions._
-import de.htwg.se.sudoku.SudokuModule
+import de.htwg.se.stratego.model.boardComponent.{Coordinates, Figure, GameBoard}
 import de.htwg.se.sudoku.model.fileIoComponent.FileIOInterface
-import de.htwg.se.sudoku.model.gridComponent.{CellInterface, GridInterface}
+import net.codingwell.scalaguice.InjectorExtensions._
+import de.htwg.se.stratego.model.boardComponent.GameBoardInterface
 import play.api.libs.json._
 
 import scala.io.Source
 
 class FileIO extends FileIOInterface {
 
-  override def load: Option[GridInterface] = {
-    var gridOption: Option[GridInterface] = None
+  override def load: Option[GameBoardInterface] = {
+    var grid: GameBoardInterface = new GameBoard()
     val source: String = Source.fromFile("grid.json").getLines.mkString
-    val json: JsValue = Json.parse(source)
-    val size = (json \ "grid" \ "size").get.toString.toInt
-    val injector = Guice.createInjector(new SudokuModule)
-    size match {
-      case 1 => gridOption = Some(injector.instance[GridInterface](Names.named("tiny")))
-      case 4 => gridOption = Some(injector.instance[GridInterface](Names.named("small")))
-      case 9 => gridOption = Some(injector.instance[GridInterface](Names.named("normal")))
-      case _ =>
+    val file: JsValue = Json.parse(source)
+    val size = (file \ "grid" \ "size").get.toString.toInt
+    //val injector = Guice.createInjector(new SudokuModule)
+    val currentPlayer = file \ "currentPlayer"
+
+    val playerOne = file \ "playerOne" \ "remaining" \\ "figure"
+    val playerOneSelected = (file \ "playerOne" \ "selected").as[Int]
+    if (playerOneSelected != -1) {
+      grid.playerOne.selectedFigure = Some(Figure.withStrength(grid.playerOne, playerOneSelected))
     }
-    gridOption match {
-      case Some(grid) => {
-        var _grid = grid
-        for (index <- 0 until size * size) {
-          val row = (json \\ "row") (index).as[Int]
-          val col = (json \\ "col") (index).as[Int]
-          val cell = (json \\ "cell") (index)
-          val value = (cell \ "value").as[Int]
-          _grid = _grid.set(row, col, value)
-          val given = (cell \ "given").as[Boolean]
-          val showCandidates = (cell \ "showCandidates").as[Boolean]
-          if (given) _grid = _grid.setGiven(row, col, value)
-          if (showCandidates) _grid = _grid.setShowCandidates(row, col)
-        }
-        gridOption=Some(_grid)
-      }
-      case None =>
+    for (fig <- playerOne) {
+      val strength: Int = (fig \ "strength").as[Int]
+      val count: Int = (fig \ "remaining").as[Int]
+      grid.playerOne.remainingFigures.put(strength, count)
     }
-    gridOption
+
+    val playerTwo = file \ "playerTwo" \ "remaining" \\ "figure"
+    val playerTwoSelected = (file \ "playerTwo" \ "selected").as[Int]
+    if (playerTwoSelected != -1) {
+      grid.playerTwo.selectedFigure = Some(Figure.withStrength(grid.playerTwo, playerTwoSelected))
+    }
+    for (fig <- playerTwo) {
+      val strength: Int = (fig \ "strength").as[Int]
+      val count: Int = (fig \ "remaining").as[Int]
+      grid.playerTwo.remainingFigures.put(strength, count)
+    }
+
+    grid.currentPlayer = if (currentPlayer.as[Boolean]) grid.playerOne else grid.playerTwo
+
+    val cellNodes= file \ "cells" \\ "cell"
+    for (cell <- cellNodes) {
+      val row: Int = (cell \ "row").as[Int]
+      val col: Int = (cell \ "col").as[Int]
+      val strength: Int = (cell \ "strength").as[Int]
+      val isFirst: Boolean = (cell \ "isFirst").as[Boolean]
+      val player = if (isFirst) { grid.playerOne } else { grid.playerTwo }
+      grid.set(Coordinates(row,col), Some(Figure.withStrength(player, strength)))
+    }
+    Some(grid)
   }
 
-  override def save(grid: GridInterface): Unit = {
+  override def save(grid: GameBoardInterface): Unit = {
     import java.io._
     val pw = new PrintWriter(new File("grid.json"))
     pw.write(Json.prettyPrint(gridToJson(grid)))
     pw.close
   }
 
-  def gridToJson(grid: GridInterface) = {
+  def gridToJson(grid: GameBoardInterface): JsObject = {
+
+    var selectedOne:Int = -1
+    var selectedTwo:Int = -1
+    if (grid.playerOne.selectedFigure.isDefined) {
+      selectedOne = grid.playerOne.selectedFigure.get.strength
+    }
+    if (grid.playerTwo.selectedFigure.isDefined) {
+      selectedTwo = grid.playerTwo.selectedFigure.get.strength
+    }
+
     Json.obj(
-      "grid" -> Json.obj(
-        "size" -> JsNumber(grid.size),
-        "cells" -> Json.toJson(
-          for {row <- 0 until grid.size;
-               col <- 0 until grid.size} yield {
-            Json.obj(
-              "row" -> row,
-              "col" -> col,
-              "cell" -> Json.toJson(grid.cell(row, col)))
-          }
+      "currentPlayer" -> JsBoolean(grid.playerOne == grid.currentPlayer),
+      "playerOne" -> Json.obj(
+        "name" -> JsString(grid.playerOne.name.toString),
+        "selected" -> JsNumber(selectedOne),
+        "remaining" -> Json.toJson(
+          for {
+            (str, rem) <- grid.playerOne.remainingFigures
+          } yield figureToJson(str, rem)
         )
-      )
+      ),
+      "playerTwo" -> Json.obj(
+        "name" -> JsString(grid.playerTwo.name.toString),
+        "selected" -> JsNumber(selectedTwo),
+        "remaining" -> Json.toJson(
+          for {
+            (str, rem) <- grid.playerTwo.remainingFigures
+          } yield figureToJson(str, rem)
+        )
+      ),
+      "cells" -> JsArray(
+        for {
+          row <- 1 to GameBoard.BOARDSIZE
+          col <- 1 to GameBoard.BOARDSIZE
+        } yield cellToJson(grid, Coordinates(row,col))
+      ),
     )
   }
 
-  implicit val cellWrites = new Writes[CellInterface] {
-    def writes(cell: CellInterface) = Json.obj(
-      "value" -> cell.value,
-      "given" -> cell.given,
-      "showCandidates" -> cell.showCandidates
+  def cellToJson(grid:GameBoardInterface, coordinates: Coordinates):JsObject = {
+    if (grid.get(coordinates).fig.isDefined) {
+      val isFirst:Boolean = grid.get(coordinates).fig.get.player == grid.playerOne
+      Json.obj(
+        "cell" -> Json.obj(
+          "row" -> JsNumber(coordinates.x),
+          "col" -> JsNumber(coordinates.y),
+          "isFirst" -> JsBoolean(isFirst),
+          "strength" -> JsNumber(grid.get(coordinates).fig.get.strength)
+        )
+      )
+    }
+    Json.obj()
+  }
+
+  def figureToJson(strength:Int, remaining:Int): JsObject = {
+    Json.obj(
+      "figure" -> Json.obj(
+        "strength" -> JsNumber(strength),
+        "remaining" -> JsNumber(remaining)
+      )
     )
   }
 

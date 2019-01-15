@@ -2,7 +2,7 @@ package de.htwg.se.stratego.controller
 
 import de.htwg.se.stratego.model._
 import de.htwg.se.stratego.model.boardComponent._
-import de.htwg.se.stratego.model.fileIoComponent.fileIoXmlImpl.FileIO
+import de.htwg.se.stratego.model.fileIoComponent.fileIoJsonImpl.FileIO
 import de.htwg.se.stratego.view.{AlertView, StrategoGUI, StrategoTUI}
 import scalafx.application.Platform
 import scalafx.scene.control.Alert
@@ -219,7 +219,7 @@ class GameEngine extends Subject[GameEngine] {
   }
 
   def saveGame(): Unit = {
-    new FileIO().saveXML(gb)
+    new FileIO().save(gb)
   }
 }
 
