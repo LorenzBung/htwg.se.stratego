@@ -3,7 +3,6 @@ package de.htwg.se.stratego.model
 import de.htwg.se.stratego.model.boardComponent.Figure
 
 case class Player(name:String) {
-
   val remainingFigures = scala.collection.mutable.Map(
     Figure.FLAG -> 1,
     Figure.MARSHAL -> 1,

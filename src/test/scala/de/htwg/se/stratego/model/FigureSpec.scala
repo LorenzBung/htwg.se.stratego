@@ -149,26 +149,6 @@ class FigureSpec extends WordSpec with Matchers {
     }
   }}
 
-  "A Figure" when { "tested to beat a stronger figure" should {
-    val a = Player("Player A")
-    val fig = new Figure.Lieutenant(a)
-    val b = Player("Player B")
-    val secondFig = new Figure.Marshal(b)
-    "not be able to beat it" in {
-      fig.canBeat(secondFig) should be(false)
-    }
-  }}
-
-  "A Figure" when { "tested to beat a weaker figure" should {
-    val a = Player("Player A")
-    val fig = new Figure.Marshal(a)
-    val b = Player("Player B")
-    val secondFig = new Figure.Lieutenant(b)
-    "be able to beat it" in {
-      fig.canBeat(secondFig) should be(true)
-    }
-  }}
-
   "A Figure" when { "asked about its String representation" should {
     val p = Player("Test Player")
     val fig = new Figure.Major(p)
