@@ -1,5 +1,5 @@
 coverageEnabled := true
-coverageExcludedPackages := "de.htwg.se.stratego.view.*;*Observer.scala;*Subject.scala"
+coverageExcludedPackages := "de.htwg.se.stratego.view.*;de.htwg.se.stratego.model.Observer.*;de.htwg.se.stratego.model.Subject.*"
 
 name          := "htwg.se.stratego"
 organization  := "de.htwg.se"
