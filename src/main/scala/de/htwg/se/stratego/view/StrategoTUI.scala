@@ -70,7 +70,7 @@ class StrategoTUI extends Observer[GameEngine] {
 
         case Array("select", fig) if fig.forall(_.isDigit) =>
           val strength = fig.toInt
-          if (engine.selectFigure(engine.gb.currentPlayer, strength)) {
+          if (engine.selectFigure(strength)) {
             print("Selected")
           }else{
             println("You don't have any Figures of this strength")

@@ -9,12 +9,31 @@ import org.scalatest.{Matchers, WordSpec}
 @RunWith(classOf[JUnitRunner])
 class GameEngineSpec extends WordSpec with Matchers {
   "A GameEngine" when {
-    val gb = new GameBoard()
     val engine = new GameEngine()
-    engine.gb = gb
     "exiting" should {
       "do it correctly" in {
         //TODO engine.exit() should be(())
+      }
+    }
+    "it creates a new game" should {
+      "create an empty board" in {
+        engine.newGame()
+        for (row <- 1 to engine.gb.size; col <- 1 to engine.gb.size){
+          engine.get(Coordinates(row, col)).isEmpty should be(true)
+        }
+      }
+    }
+    "it saves and loads a game" should {
+      "do it correctly" in {
+        engine.selectFigure(3)
+        engine.set(Coordinates(1, 10))
+        val board = engine.gb
+        engine.saveGame()
+        engine.newGame()
+        engine.loadGame()
+        for (row <- 1 to engine.gb.size; col <- 1 to engine.gb.size){
+          engine.get(Coordinates(row, col)).fig should be(board.get(Coordinates(row, col)).fig)
+        }
       }
     }
     "asked to move a non-existing figure" should {
@@ -49,12 +68,12 @@ class GameEngineSpec extends WordSpec with Matchers {
     }
     "asked for a certain field" should {
       "be the one the GameBoard returns" in {
-        engine.get(Coordinates(1, 1)) should be(gb.get(Coordinates(1, 1)))
+        engine.get(Coordinates(1, 1)) should be(engine.gb.get(Coordinates(1, 1)))
       }
     }
     "asked about movement" should {
       engine.gb.currentPlayer = engine.gb.playerTwo
-      engine.selectFigure(engine.gb.playerTwo, 3)
+      engine.selectFigure(3)
       engine.set(Coordinates(1, 1))
       "return the correct value for diagonal movement" in {
         engine.movesDiagonally(Coordinates(1, 1), Coordinates(2, 2)) should be(true)
@@ -69,6 +88,9 @@ class GameEngineSpec extends WordSpec with Matchers {
         engine.isFigureInBetween(Coordinates(1, 1), Coordinates(1, 3)) should be(false)
       }
       "return the correct value if a figure is in between moving vertically" in {
+        engine.gb.currentPlayer = engine.gb.playerTwo
+        engine.selectFigure(3)
+        engine.set(Coordinates(1, 1))
         engine.set(Coordinates(1, 2))
         engine.isFigureInBetween(Coordinates(1, 1), Coordinates(1, 3)) should be(true)
       }
@@ -91,12 +113,12 @@ class GameEngineSpec extends WordSpec with Matchers {
         engine.canMove(Coordinates(1, 1), Coordinates(2, 1)) should be(false)
       }
       "return the correct value if a figure can move and it is a scout" in {
-        engine.selectFigure(engine.gb.playerTwo, 2)
+        engine.selectFigure(2)
         engine.set(Coordinates(2, 2))
         engine.canMove(Coordinates(2, 2), Coordinates(2, 3)) should be(true)
       }
       "return the correct value if a figure can move and it cannot move" in {
-        engine.selectFigure(engine.gb.playerTwo, 0)
+        engine.selectFigure(0)
         engine.unset(Coordinates(2, 1))
         engine.set(Coordinates(2, 1))
         engine.canMove(Coordinates(2, 1), Coordinates(2, 2)) should be(false)
