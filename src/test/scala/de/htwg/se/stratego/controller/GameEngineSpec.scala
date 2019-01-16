@@ -1,6 +1,5 @@
 package de.htwg.se.stratego.controller
 
-import de.htwg.se.stratego.model.Player
 import de.htwg.se.stratego.model.boardComponent.{Coordinates, GameBoard}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
