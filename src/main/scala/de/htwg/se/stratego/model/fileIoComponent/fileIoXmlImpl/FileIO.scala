@@ -10,13 +10,12 @@ class FileIO extends FileIOInterface {
   override def load: Option[GameBoardInterface] = {
     val grid: GameBoardInterface = new GameBoard()
     val file = XML.loadFile("grid.xml")
-    //val injector = Guice.createInjector(new SudokuModule)
 
     val currentPlayer = file \\ "currentPlayer"
 
     val playerOne = file \\ "playerOne" \ "remaining" \ "figure"
     val playerOneSelected = (file \\ "playerOne" \ "@selected").text.toInt
-    if(playerOneSelected != -1){
+    if (playerOneSelected != -1) {
       grid.playerOne.selectedFigure = Some(Figure.withStrength(grid.playerOne, playerOneSelected))
     }
     for (fig <- playerOne) {
@@ -27,7 +26,7 @@ class FileIO extends FileIOInterface {
 
     val playerTwo = file \\ "playerTwo" \ "remaining" \ "figure"
     val playerTwoSelected = (file \\ "playerTwo" \ "@selected").text.toInt
-    if(playerTwoSelected != -1){
+    if (playerTwoSelected != -1) {
       grid.playerTwo.selectedFigure = Some(Figure.withStrength(grid.playerTwo, playerTwoSelected))
     }
     for (fig <- playerTwo) {
@@ -44,7 +43,7 @@ class FileIO extends FileIOInterface {
       val col: Int = (cell \ "@col").text.toInt
       val strength: Int = cell.text.trim.toInt
       val isFirst: Boolean = (cell \ "@isFirst").text.toBoolean
-      val player = if (isFirst) { grid.playerOne } else { grid.playerTwo }
+      val player = if (isFirst) grid.playerOne else grid.playerTwo
       grid.set(Coordinates(row,col), Some(Figure.withStrength(player, strength)))
     }
     Some(grid)

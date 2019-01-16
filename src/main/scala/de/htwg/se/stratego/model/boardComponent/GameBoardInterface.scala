@@ -1,6 +1,6 @@
 package de.htwg.se.stratego.model.boardComponent
 
-import de.htwg.se.stratego.model.{Player, Subject}
+import de.htwg.se.stratego.model.Player
 
 trait GameBoardInterface {
   var playerOne:Player

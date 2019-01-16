@@ -1,6 +1,6 @@
 package de.htwg.se.stratego.controller
 
-import com.google.inject.Guice
+import com.google.inject.{Guice, Injector}
 import de.htwg.se.stratego.StrategoModule
 import de.htwg.se.stratego.model._
 import net.codingwell.scalaguice.InjectorExtensions._
@@ -12,26 +12,24 @@ import scalafx.scene.control.Alert
 import scalafx.scene.control.Alert.AlertType
 
 class GameEngine extends Subject[GameEngine] {
-  val injector = Guice.createInjector(new StrategoModule)
+  val injector: Injector = Guice.createInjector(new StrategoModule)
   var gb: GameBoardInterface = injector.instance[GameBoardInterface]
 
   def exit(): Unit = {
     System.exit(0)
   }
 
-  /**
-    * Moves a Figure from a position to another.
-    * @param from The current coords of the figure to be moved.
-    * @param to The coords the figure is moved to.
-    * @return False, if the figure can't be moved, otherwise true.
-    */
   def move(from: Coordinates, to: Coordinates): Boolean = {
     // No figure on field "from" OR field locked
-    if (gb.get(from).isEmpty || gb.get(to).isLocked) return false
+    if (gb.get(from).isEmpty || gb.get(to).isLocked) {
+      return false
+    }
 
     val attacker = gb.get(from).fig.get
 
-    if (!canMove(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) return false
+    if (!canMove(from, to) || !attacker.isMovable || attacker.player != gb.currentPlayer) {
+      return false
+    }
 
     if (gb.get(to).isEmpty) {
       gb.move(from, to)
@@ -42,7 +40,9 @@ class GameEngine extends Subject[GameEngine] {
     val defender = gb.get(to).fig.get
 
     // Attacker must be the current player, cannot beat own figures
-    if (defender.player == gb.currentPlayer) return false
+    if (defender.player == gb.currentPlayer) {
+      return false
+    }
 
     var attackerWins = false
     var defenderWins = false
@@ -70,7 +70,7 @@ class GameEngine extends Subject[GameEngine] {
       // Figures have same strength
     }
 
-    if(attackerWins){
+    if (attackerWins) {
       gb.move(from, to)
     } else if (defenderWins) {
       gb.move(to, from)
@@ -90,11 +90,11 @@ class GameEngine extends Subject[GameEngine] {
 
   def canMove(from: Coordinates, to: Coordinates): Boolean = {
     val fig = gb.get(from).fig
-    if(fig.isEmpty){
+    if (fig.isEmpty) {
       false
-    } else if(gb.get(to).fig.isDefined && gb.get(from).fig.get.player == gb.get(to).fig.get.player){
+    } else if (gb.get(to).fig.isDefined && gb.get(from).fig.get.player == gb.get(to).fig.get.player) {
       false
-    }else if (fig.get.strength == Figure.SCOUT) {
+    } else if (fig.get.strength == Figure.SCOUT) {
       canMoveScout(from, to)
     } else if (!fig.get.isMovable) {
       false
@@ -119,13 +119,13 @@ class GameEngine extends Subject[GameEngine] {
 
   def isFigureInBetween(from: Coordinates, to: Coordinates): Boolean = {
     var figureAmount = 0
-    val xstep = if(from.x < to.x) 1 else -1
+    val xstep = if (from.x < to.x) 1 else -1
     for (i <- from.x + xstep until to.x by xstep) {
       if (!gb.get(Coordinates(i, from.y)).isEmpty || gb.get(Coordinates(i, from.y)).isLocked) {
         figureAmount += 1
       }
     }
-    val ystep = if(from.y < to.y) 1 else -1
+    val ystep = if (from.y < to.y) 1 else -1
     for (i <- from.y + ystep until to.y by ystep) {
       if (!gb.get(Coordinates(from.x, i)).isEmpty || gb.get(Coordinates(from.x, i)).isLocked) {
         figureAmount += 1
@@ -157,8 +157,9 @@ class GameEngine extends Subject[GameEngine] {
       gb.set(coord, None)
       notifyObservers()
       true
+    } else {
+      false
     }
-    false
   }
 
   def get(coord:Coordinates): Field = {
@@ -166,50 +167,45 @@ class GameEngine extends Subject[GameEngine] {
   }
   
   def set(coord:Coordinates): Boolean = {
-    if (!canSet(coord)) return false
-    gb.set(coord, gb.currentPlayer.selectedFigure)
-    gb.currentPlayer.placedFigure()
-    notifyObservers()
+    if (!canSet(coord)) {
+      false
+    } else {
+      gb.set(coord, gb.currentPlayer.selectedFigure)
+      gb.currentPlayer.placedFigure()
+      notifyObservers()
 
-    if(!gb.currentPlayer.hasUnplacedFigures){
-      switchPlayers()
+      if (!gb.currentPlayer.hasUnplacedFigures) {
+        switchPlayers()
+      }
+      true
     }
-
-    true
   }
 
   def canSet(coord:Coordinates): Boolean = {
     if (coord.x > gb.size || coord.x < 1 || coord.y > gb.size || coord.y < 1) {
-      return false
+      false
+    } else if (gb.currentPlayer.selectedFigure == null){
+      false
+    } else if (gb.currentPlayer == gb.playerOne && coord.y < 7) {
+      false
+    } else if (gb.currentPlayer == gb.playerTwo && coord.y > 4) {
+      false
+    } else if (gb.get(coord).isLocked || !gb.get(coord).isEmpty) {
+      //Blocked fields
+      false
+    } else {
+      true
     }
-
-    if (gb.currentPlayer.selectedFigure == null){
-      return false
-    }
-
-    if (gb.currentPlayer == gb.playerOne && coord.y < 7) {
-      return false
-    }
-
-    if (gb.currentPlayer == gb.playerTwo && coord.y > 4) {
-      return false
-    }
-
-    //Blocked fields
-    if (gb.get(coord).isLocked || !gb.get(coord).isEmpty) {
-      return false
-    }
-
-    true
   }
 
   def selectFigure(player: Player, strength: Int):Boolean = {
     if (strength <= Figure.BOMB && strength >= Figure.FLAG && player.remainingFigures(strength) != 0) {
       player.selectedFigure = Some(Figure.withStrength(player, strength))
       notifyObservers()
-      return true
+      true
+    } else {
+      false
     }
-    false
   }
 
   def newGame(): Unit = {

@@ -1,10 +1,6 @@
 package de.htwg.se.stratego.model.fileIoComponent.fileIoJsonImpl
 
-import com.google.inject.Guice
-import com.google.inject.name.Names
-import de.htwg.se.stratego.model.boardComponent.{Coordinates, Figure, GameBoard}
-import net.codingwell.scalaguice.InjectorExtensions._
-import de.htwg.se.stratego.model.boardComponent.GameBoardInterface
+import de.htwg.se.stratego.model.boardComponent.{Coordinates, Figure, GameBoard, GameBoardInterface}
 import de.htwg.se.stratego.model.fileIoComponent.FileIOInterface
 import play.api.libs.json._
 
@@ -16,7 +12,6 @@ class FileIO extends FileIOInterface {
     val grid: GameBoardInterface = new GameBoard()
     val source: String = Source.fromFile("grid.json").getLines.mkString
     val file: JsValue = Json.parse(source)
-    val injector = Guice.createInjector()
     val currentPlayer = file \ "currentPlayer"
 
     val playerOne = file \ "playerOne" \ "remaining" \\ "figure"
@@ -49,7 +44,7 @@ class FileIO extends FileIOInterface {
       val col: Int = (cell \ "col").as[Int]
       val strength: Int = (cell \ "strength").as[Int]
       val isFirst: Boolean = (cell \ "isFirst").as[Boolean]
-      val player = if (isFirst) { grid.playerOne } else { grid.playerTwo }
+      val player = if (isFirst) grid.playerOne else grid.playerTwo
       grid.set(Coordinates(row,col), Some(Figure.withStrength(player, strength)))
     }
     Some(grid)
