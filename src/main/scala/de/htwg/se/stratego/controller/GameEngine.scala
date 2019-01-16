@@ -198,7 +198,8 @@ class GameEngine extends Subject[GameEngine] {
     }
   }
 
-  def selectFigure(player: Player, strength: Int):Boolean = {
+  def selectFigure(strength: Int):Boolean = {
+    val player = gb.currentPlayer
     if (strength <= Figure.BOMB && strength >= Figure.FLAG && player.remainingFigures(strength) != 0) {
       player.selectedFigure = Some(Figure.withStrength(player, strength))
       notifyObservers()

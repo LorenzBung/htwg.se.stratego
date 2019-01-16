@@ -66,7 +66,7 @@ class FigureSelectionView(engine: GameEngine) extends HBox {
       }
     }
 
-    onMouseEntered = (_event: MouseEvent) => {
+    onMouseEntered = (event: MouseEvent) => {
       if (enabled) {
         scaleX = 1.2
         scaleY = 1.2
@@ -81,7 +81,7 @@ class FigureSelectionView(engine: GameEngine) extends HBox {
     onMouseClicked = (_event: MouseEvent) => {
       if (enabled){
         clearFigureSelection()
-        engine.selectFigure(engine.gb.currentPlayer, strength)
+        engine.selectFigure(strength)
       }
     }
   }
