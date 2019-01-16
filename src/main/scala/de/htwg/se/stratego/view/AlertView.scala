@@ -40,7 +40,7 @@ class AlertView(attacker: Figure, attackerDies:Boolean, defender: Figure, defend
     ft.setDuration(new Duration(2000))
     ft.setDelay(new Duration(2000))
     ft.setFromValue(1.0)
-    ft.setToValue(0.0)
+    ft.setToValue(0.2)
     ft.setCycleCount(1)
     ft.play()
   }
@@ -51,7 +51,7 @@ class AlertView(attacker: Figure, attackerDies:Boolean, defender: Figure, defend
     ft.setDuration(new Duration(2000))
     ft.setDelay(new Duration(2000))
     ft.setFromValue(1.0)
-    ft.setToValue(0.0)
+    ft.setToValue(0.2)
     ft.setCycleCount(1)
     ft.play()
   }

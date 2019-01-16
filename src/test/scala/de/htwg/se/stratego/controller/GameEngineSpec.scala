@@ -1,6 +1,6 @@
 package de.htwg.se.stratego.controller
 
-import de.htwg.se.stratego.model.boardComponent.{Coordinates, GameBoard}
+import de.htwg.se.stratego.model.boardComponent.{Coordinates, Figure, GameBoard}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{Matchers, WordSpec}
@@ -68,6 +68,56 @@ class GameEngineSpec extends WordSpec with Matchers {
     "asked for a certain field" should {
       "be the one the GameBoard returns" in {
         engine.get(Coordinates(1, 1)) should be(engine.gb.get(Coordinates(1, 1)))
+      }
+    }
+    "moving figures" should {
+      val engine = new GameEngine()
+      engine.gb.currentPlayer = engine.gb.playerTwo
+      engine.selectFigure(3)
+      engine.set(Coordinates(1, 1))
+      "return the correct value for diagonal movement" in {
+        try {
+          engine.move(Coordinates(1, 1), Coordinates(2, 1))
+        } catch { case _: Throwable =>}
+        engine.get(Coordinates(2, 1)).fig.get.strength should be(3)
+      }
+    }
+    "beating figures" should {
+      val engine = new GameEngine()
+      engine.gb.currentPlayer = engine.gb.playerTwo
+      engine.selectFigure(3)
+      engine.set(Coordinates(1, 1))
+      engine.selectFigure(1)
+      engine.set(Coordinates(2, 1))
+      engine.selectFigure(2)
+      engine.set(Coordinates(10, 1))
+      engine.gb.currentPlayer = engine.gb.playerOne
+      engine.selectFigure(2)
+      engine.set(Coordinates(1, 7))
+      engine.set(Coordinates(2, 7))
+      engine.set(Coordinates(10, 7))
+      "defender wins" in {
+        try {
+          engine.move(Coordinates(1, 7), Coordinates(1, 1))
+        } catch { case _: Throwable => }
+        engine.get(Coordinates(1, 1)).fig.get.strength should be(3)
+        engine.get(Coordinates(1, 7)).fig should be(None)
+      }
+
+      "attacker wins" in {
+        try {
+          engine.move(Coordinates(2, 7), Coordinates(2, 1))
+        } catch { case _: Throwable => }
+        engine.get(Coordinates(2, 1)).fig.get.strength should be(2)
+        engine.get(Coordinates(2, 7)).fig should be(None)
+      }
+
+      "nobody wins" in {
+        try {
+          engine.move(Coordinates(10, 7), Coordinates(10, 1))
+        } catch { case _: Throwable => }
+        engine.get(Coordinates(10, 1)).fig should be(None)
+        engine.get(Coordinates(10, 7)).fig should be(None)
       }
     }
     "asked about movement" should {

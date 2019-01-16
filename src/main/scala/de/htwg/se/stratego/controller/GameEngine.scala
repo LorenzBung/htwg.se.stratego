@@ -56,8 +56,7 @@ class GameEngine extends Subject[GameEngine] {
     } else if (defender.strength == Figure.FLAG) {
       // Attacker wins game
       attackerWins = true
-      println()
-      println(attacker.player.name + " wins")
+      println("\n" + attacker.player.name + " wins")
       new Alert(AlertType.Information, attacker.player.name + " wins").showAndWait()
       exit()
     } else if (attacker.strength > defender.strength) {
@@ -73,7 +72,7 @@ class GameEngine extends Subject[GameEngine] {
     if (attackerWins) {
       gb.move(from, to)
     } else if (defenderWins) {
-      gb.move(to, from)
+      gb.set(from, None)
     } else {
       gb.set(from, None)
       gb.set(to, None)
